@@ -130,4 +130,4 @@
   splunk start --debug
   ```
 
-These commands help manage Splunk configurations, users, forwarders, licensing, and troubleshooting. Let me know if you need more details on any specific command! 🚀
+
