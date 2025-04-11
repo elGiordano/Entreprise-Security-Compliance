@@ -289,6 +289,7 @@ useSSL = 1
 ---
 
 ## **Advanced Deployment Tools**
+
 | Method | Use Case | Command Example |
 |--------|----------|-----------------|
 | **Splunk Deployment Server** | Centralized config management | `.\splunk.exe set deploy-poll <deploy_server>:8089` |
@@ -298,6 +299,7 @@ useSSL = 1
 ---
 
 ## **Troubleshooting Checklist**
+
 | Issue | Debug Command |
 |-------|---------------|
 | GPO not applying | `gpresult /H gpreport.html` |
@@ -319,11 +321,10 @@ useSSL = 1
 
 
 
-```
-
-
 ---
 ---
+
+
 
 ## specific example for AD forest-specific deployments environment:
 
@@ -411,6 +412,7 @@ sslAltNameToCheck = DNS:splunk-idx01.domainB.corp
 
 ### **4. Security & Access Control**
 #### **A. Service Account Strategies**
+
 | Scenario | Account Type | Permission Requirements |
 |----------|-------------|-------------------------|
 | **Single domain** | Domain User | Event Log Readers group |
@@ -467,6 +469,7 @@ whitelist = 4624,4625,4768,4769
 
 ### **6. Troubleshooting Cross-Domain Issues**
 #### **Common Problems & Solutions**
+
 | Issue | Diagnostic Command | Solution |
 |-------|--------------------|----------|
 | GPO not applying | `gpresult /H gpreport.html` | Verify WMI filtering and security filtering |
