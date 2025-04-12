@@ -755,7 +755,7 @@ FORMAT = admin_index         # Special index for admins
 
 ### **6. Management and Troubleshooting**
 
-#### **Key Commands:
+#### ** Key Commands:
 ```bash
 splunk reload forwarder       # Apply config changes
 splunk list forward-server    # Verify output destinations
