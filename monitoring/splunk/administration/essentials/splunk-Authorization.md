@@ -368,3 +368,208 @@ curl -k -u admin:password https://localhost:8089/services/authorization/capabili
   | table _time, user, info
   ```
 
+---
+---
+---
+
+## **Role-Based Field Filtering** in Splunk, covering implementation methods, configuration examples, and best practices:
+
+---
+
+## **Role-Based Field Filtering Methods**
+
+### **1. Using `fields.conf` with Role-Based Overrides**
+**Location**:  
+`$SPLUNK_HOME/etc/apps/<app>/local/fields.conf`
+
+**Configuration**:
+```ini
+[<sourcetype>]
+FIELD::<fieldname> = <permission_expression>
+
+# Example - Hide 'credit_card' field from non-finance roles
+[web_transactions]
+FIELD::credit_card = match(roles, ".*finance.*") OR match(roles, ".*admin.*")
+```
+
+### **2. Search-Time Field Filtering with `props.conf`**
+**Location**:  
+`$SPLUNK_HOME/etc/system/local/props.conf`
+
+**Configuration**:
+```ini
+[<sourcetype>]
+FIELDALIAS-filtered = <original_field> AS <visible_field> IF match(roles,"role1|role2")
+EVAL-<fieldname> = if(match(roles,"admin"), original_value, "REDACTED")
+```
+
+### **3. Using Lookup-Based Filtering**
+**Steps**:
+1. Create a CSV lookup (`field_permissions.csv`):
+   ```csv
+   field,roles
+   ssn,admin,hr
+   salary,finance,admin
+   ```
+2. Configure `transforms.conf`:
+   ```ini
+   [field_filter_lookup]
+   filename = field_permissions.csv
+   ```
+
+3. Apply in `props.conf`:
+   ```ini
+   [<sourcetype>]
+   LOOKUP-field_filter = field_filter_lookup field OUTPUT roles AS allowed_roles
+   EVAL-field_value = if(match(roles,allowed_roles), field_value, "REDACTED")
+   ```
+
+---
+
+## **Implementation Examples**
+
+### **Example 1: Basic Field Hiding**
+```ini
+# fields.conf
+[web_logs]
+FIELD::password = match(roles, ".*admin.*")
+FIELD::credit_card = match(roles, ".*payment.*")
+```
+
+### **Example 2: Dynamic Field Masking**
+```ini
+# props.conf
+[medical_records]
+EVAL-patient_id = if(match(roles,"doctor|admin"), patient_id, "****"+substr(patient_id,-4))
+```
+
+### **Example 3: Complex Role Logic**
+```ini
+# props.conf
+[financial_data]
+EVAL-transaction_amount = case(
+  match(roles,"finance_manager"), transaction_amount,
+  match(roles,"auditor"), round(transaction_amount,-3),
+  true(), "CONFIDENTIAL"
+)
+```
+
+---
+
+## **Role-Based Field Access Matrix**
+
+| Field | Admin | Finance | HR | Analyst |
+|-------|-------|---------|----|---------|
+| ssn | ✓ | ✗ | ✓ | ✗ |
+| salary | ✓ | ✓ | ✗ | ✗ |
+| email | ✓ | ✓ | ✓ | ✓ |
+| credit_score | ✓ | ✓ | ✗ | ✗ |
+
+---
+
+## **Best Practices**
+
+1. **Layered Security**:
+   - Combine with index-level restrictions (`srchIndexesAllowed`)
+   - Use field aliasing to maintain searchability:
+     ```ini
+     [props.conf]
+     FIELDALIAS-secure_email = email AS masked_email IF !match(roles,"admin")
+     ```
+
+2. **Performance Considerations**:
+   - Apply filters at search head (not indexer) for dynamic role changes
+   - Use lookup-based filtering for >100 field rules
+
+3. **Audit Trail**:
+   ```ini
+   [audit]
+   auditEvents = field_access
+   ```
+
+4. **Testing Methodology**:
+   ```bash
+   # Test as different roles
+   splunk search "index=secure" -auth username:password -app context
+   ```
+
+---
+
+## **Troubleshooting Commands**
+
+1. **Check Effective Field Visibility**:
+   ```bash
+   splunk btool fields list --debug | grep -A 5 "<sourcetype>"
+   ```
+
+2. **Verify Role Matching**:
+   ```sql
+   | rest /services/authentication/current-context | table roles
+   ```
+
+3. **Test Filter Logic**:
+   ```sql
+   | eval test=if(match("admin,user", "admin"), "visible", "hidden") | table test
+   ```
+
+---
+
+## **Advanced Techniques**
+
+### **1. Time-Based Field Access**
+```ini
+[props.conf]
+EVAL-ssn = if(match(roles,"auditor") AND relative_time(now(), "-9h@h") < now(), ssn, "REDACTED")
+```
+
+### **2. Geolocation-Based Filtering**
+```ini
+[transforms.conf]
+[geo_filter]
+REGEX = <client_ip>
+DEST_KEY = roles
+FORMAT = $1,remote_office
+```
+
+### **3. Splunk Enterprise Security Integration**
+```ini
+[es_field_filter]
+action.param.hide_fields = ssn,credit_card
+action.param.roles = admin,finance
+```
+
+---
+
+## **Security Considerations**
+
+1. **Field Precedence**:
+   - App-specific configs override system defaults
+   - Last matching rule wins in `fields.conf`
+
+2. **PII Protection**:
+   ```ini
+   [props.conf]
+   REPORT-pii_mask = mask_ssn, mask_creditcard
+   
+   [transforms.conf]
+   [mask_ssn]
+   REGEX = (\d{3})-(\d{2})-(\d{4})
+   FORMAT = XXX-XX-$3
+   ```
+
+3. **Validation Command**:
+   ```bash
+   splunk validate field-filtering -role <rolename> -sourcetype <sourcetype>
+   ```
+
+---
+
+## **Visualization of Data Flow**
+```mermaid
+graph TD
+    A[Raw Event] --> B{Field Filtering}
+    B -->|Role=admin| C[Full Access]
+    B -->|Role=analyst| D[Redacted Fields]
+    B -->|Role=auditor| E[Partial Masking]
+```
+
