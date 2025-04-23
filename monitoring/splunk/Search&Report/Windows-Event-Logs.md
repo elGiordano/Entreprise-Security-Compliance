@@ -111,3 +111,136 @@ index=win_events
 ### **Final Thoughts**
 Windows Event Logs are **goldmines** for detecting attacks. By focusing on **critical Event IDs** and mapping them to **MITRE ATT&CK**, Splunk becomes a powerful tool for SOC analysts.  
 
+----
+
+### **Splunk Saved Searches for Critical Windows Attack Techniques**  
+ **ready-to-use Splunk saved searches** mapped to **MITRE ATT&CK techniques** for detecting common Windows-based attacks.  
+
+---
+
+### **1. Credential Dumping (T1003)**
+**Technique**: Attackers dump credentials from LSASS memory using tools like Mimikatz.  
+**Relevant Event IDs**:  
+- **10** (ProcessAccess from Sysmon) – LSASS access  
+- **4688** (New process) – Suspicious process calling LSASS  
+
+#### **Splunk Query (Sysmon + Security Logs)**  
+```spl
+index=win_events (EventCode=10 TargetImage="*lsass.exe*" AND GrantedAccess="0x1FFFFF") 
+OR (EventCode=4688 Process="*mimikatz*" OR CommandLine="*sekurlsa::logonpasswords*") 
+| stats count by host, user, Process, CommandLine 
+| sort - count
+```
+
+---
+
+### **2. PowerShell Execution (T1059.001)**
+**Technique**: Malicious PowerShell scripts (obfuscation, bypassing logging).  
+**Relevant Event IDs**:  
+- **4104** (PowerShell Script Block Logging)  
+- **4688** (Process creation)  
+
+#### **Splunk Query (Detect Obfuscated PowerShell)**  
+```spl
+index=win_events (EventCode=4104 OR (EventCode=4688 Process="*powershell*")) 
+| search CommandLine="* -nop -exec bypass *" OR CommandLine="* -EncodedCommand *" OR CommandLine="*Invoke-*" 
+| table _time, host, user, CommandLine
+```
+
+---
+
+### **3. Lateral Movement via PsExec (T1021.002)**
+**Technique**: Attackers use PsExec for lateral movement.  
+**Relevant Event IDs**:  
+- **4688** (PsExec process creation)  
+- **5140** (Network share access)  
+
+#### **Splunk Query (Detect PsExec Usage)**  
+```spl
+index=win_events (EventCode=4688 (Process="*PsExec*" OR Process="*psexesvc*")) 
+OR (EventCode=5140 RelativeTargetName="*ADMIN$*") 
+| stats count by host, user, Process, RelativeTargetName 
+| sort - count
+```
+
+---
+
+### **4. Persistence via Scheduled Tasks (T1053.005)**
+**Technique**: Malicious scheduled tasks for persistence.  
+**Relevant Event IDs**:  
+- **106** (Scheduled task created)  
+- **4698** (Scheduled task modified)  
+
+#### **Splunk Query (Detect Malicious Tasks)**  
+```spl
+index=win_events (EventCode=106 OR EventCode=4698) 
+| search TaskName="*Update*" OR Author="*SYSTEM*" 
+| table _time, host, TaskName, Author, Command
+```
+
+---
+
+### **5. RDP Brute Force (T1110.003)**
+**Technique**: Attackers brute-force RDP logins.  
+**Relevant Event IDs**:  
+- **4625** (Failed logon)  
+- **4776** (NTLM authentication failure)  
+
+#### **Splunk Query (Detect RDP Attacks)**  
+```spl
+index=win_events (EventCode=4625 LogonType=10) OR EventCode=4776 
+| stats count by src_ip, user 
+| where count > 5 
+| sort - count
+```
+
+---
+
+### **6. Registry Persistence (T1547.001)**
+**Technique**: Modifying `Run` keys for persistence.  
+**Relevant Event IDs**:  
+- **4657** (Registry value modified) – Sysmon  
+- **13** (RegistryEvent) – Sysmon  
+
+#### **Splunk Query (Detect Run Key Modifications)**  
+```spl
+index=win_events (EventCode=13 OR EventCode=4657) 
+| search TargetObject="*\\Run\\*" 
+| table _time, host, user, TargetObject, Details
+```
+
+---
+
+### **7. Windows Defender Tampering (T1562.001)**
+**Technique**: Disabling AV for evasion.  
+**Relevant Event IDs**:  
+- **5001** (Windows Defender disabled)  
+- **4688** (Process stopping AV services)  
+
+#### **Splunk Query (Detect AV Tampering)**  
+```spl
+index=win_events (EventCode=5001) OR (EventCode=4688 (Process="*MsMpEng.exe*" OR CommandLine="*sc stop WinDefend*")) 
+| table _time, host, user, Process, CommandLine
+```
+
+---
+
+### **How to Deploy These in Splunk**  
+1. **Save as Alerts**:  
+   - Go to **Splunk Search** → **Save As** → **Alert**.  
+   - Set a **cron schedule** (e.g., every 15 mins).  
+   - Trigger actions (email, ITSM integration).  
+
+2. **Add to Enterprise Security (ES)**:  
+   - Use **Correlation Searches** in Splunk ES.  
+   - Map to MITRE ATT&CK via `mitre_attack_lookup`.  
+
+3. **Visualize in Dashboards**:  
+   - Create a **Windows Threat Hunting Dashboard** with these queries.  
+
+---
+
+### **Final Tips**  
+🔹 **Tune for False Positives** (Adjust thresholds like `count > 5`).  
+🔹 **Enrich with Threat Intel** (Use `lookup` to match IOCs).  
+🔹 **Combine with Sysmon** (For deeper visibility).  
