@@ -1,4 +1,4 @@
-Here's a comprehensive **role-based access control (RBAC) design** for your Splunk multi-site architecture with SmartStore and federated search:
+ **role-based access control (RBAC) design** for our Splunk multi-site architecture with SmartStore and federated search:
 
 ---
 
