@@ -307,3 +307,193 @@ adExclude = true  # Bypass even if AD is configured
    [ldap_splunk_prod:siteB] 
    host = dc2.dr.corp.example.com  # DR site DC
    ```
+
+---
+
+**PowerShell scripts** to automate Active Directory integration tasks for our Splunk deployment:
+
+---
+
+### **1. AD Group Creation Script**
+```powershell
+# Creates Splunk-specific AD groups and OUs
+Import-Module ActiveDirectory
+
+$domainDN = (Get-ADDomain).DistinguishedName
+$splunkOU = "OU=Splunk,OU=Security,$domainDN"
+$serviceAccountOU = "OU=Service-Accounts,$domainDN"
+
+# Create OUs if they don't exist
+if (-not (Get-ADOrganizationalUnit -Filter "Name -eq 'Splunk'" -SearchBase "OU=Security,$domainDN" -ErrorAction SilentlyContinue)) {
+    New-ADOrganizationalUnit -Name "Splunk" -Path "OU=Security,$domainDN" -ProtectedFromAccidentalDeletion $true
+}
+
+# Create Splunk groups
+$groups = @(
+    "splunk_cluster_admins",
+    "splunk_federated_admins",
+    "splunk_dr_analysts",
+    "splunk_security_auditors"
+)
+
+foreach ($group in $groups) {
+    New-ADGroup -Name $group `
+                -GroupScope Global `
+                -Path $splunkOU `
+                -Description "Splunk $group role"
+}
+
+# Create service account
+$serviceAccountPassword = ConvertTo-SecureString -String "P@ssw0rd123!" -AsPlainText -Force
+New-ADUser -Name "splunk-auth" `
+           -UserPrincipalName "splunk-auth@corp.example.com" `
+           -Path $serviceAccountOU `
+           -AccountPassword $serviceAccountPassword `
+           -Enabled $true `
+           -PasswordNeverExpires $true `
+           -ChangePasswordAtLogon $false
+
+Add-ADGroupMember -Identity "splunk_cluster_admins" -Members "splunk-auth"
+```
+
+---
+
+### **2. User-Role Mapping Report**
+```powershell
+# Generates a CSV of AD users and their Splunk roles
+$output = @()
+$groups = Get-ADGroup -Filter * -SearchBase "OU=Splunk,OU=Security,$domainDN"
+
+foreach ($group in $groups) {
+    $members = Get-ADGroupMember -Identity $group.Name | Where-Object {$_.objectClass -eq 'user'}
+    
+    foreach ($user in $members) {
+        $output += [PSCustomObject]@{
+            UserName = $user.SamAccountName
+            ADGroup = $group.Name
+            SplunkRole = $group.Name.Replace("splunk_","").Replace("_"," ")
+            Email = (Get-ADUser $user -Properties mail).mail
+        }
+    }
+}
+
+$output | Export-Csv -Path "C:\Temp\Splunk_AD_Role_Mapping.csv" -NoTypeInformation
+```
+
+---
+
+### **3. Service Account Permission Verification**
+```powershell
+# Validates the Splunk service account has required permissions
+$serviceAccount = Get-ADUser -Identity "splunk-auth" -Properties memberOf
+$requiredGroups = @("splunk_cluster_admins", "splunk_federated_admins")
+
+$missingGroups = $requiredGroups | Where-Object {
+    $groupDN = (Get-ADGroup -Identity $_).DistinguishedName
+    $groupDN -notin $serviceAccount.memberOf
+}
+
+if ($missingGroups) {
+    Write-Warning "Service account is missing these groups: $($missingGroups -join ', ')"
+    Add-ADGroupMember -Identity $missingGroups -Members "splunk-auth"
+} else {
+    Write-Host "Service account has all required permissions" -ForegroundColor Green
+}
+```
+
+---
+
+### **4. Automated AD Group Sync to Splunk**
+```powershell
+# Updates Splunk's authorize.conf based on AD groups
+$splunkPath = "C:\Program Files\Splunk\etc\system\local\authorize.conf"
+$groupMappings = @{
+    "splunk_cluster_admins" = "cluster_admin"
+    "splunk_federated_admins" = "federated_admin"
+    "splunk_dr_analysts" = "dr_search_head"
+}
+
+$confContent = @()
+foreach ($mapping in $groupMappings.GetEnumerator()) {
+    $confContent += "[roleMapping_$($mapping.Key)]"
+    $confContent += "$($mapping.Key) = $($mapping.Value)"
+    $confContent += ""
+}
+
+Set-Content -Path $splunkPath -Value $confContent
+
+# Restart Splunk to apply changes
+Restart-Service -Name Splunkd -Force
+```
+
+---
+
+### **5. AD Certificate Automation**
+```powershell
+# Exports and deploys LDAPS certificate to Splunk servers
+$cert = Get-ChildItem -Path "Cert:\LocalMachine\My\" | 
+        Where-Object { $_.Subject -like "*CN=ldap.corp.example.com*" } |
+        Select-Object -First 1
+
+if ($cert) {
+    # Export certificate
+    Export-Certificate -Cert $cert -FilePath "C:\Temp\ldap_cert.cer" -Type CERT
+    
+    # Deploy to Splunk servers (example for one server)
+    $splunkServers = @("splunk-indexer1", "splunk-searchhead1")
+    foreach ($server in $splunkServers) {
+        Copy-Item -Path "C:\Temp\ldap_cert.cer" -Destination "\\$server\c$\Program Files\Splunk\etc\auth\"
+    }
+} else {
+    Write-Error "LDAPS certificate not found!"
+}
+```
+
+---
+
+### **6. Emergency Access Provisioning**
+```powershell
+# Creates break-glass accounts during outages
+$emergencyUsers = @(
+    @{Name="splunk-emergency1"; Role="emergency_admin"},
+    @{Name="splunk-emergency2"; Role="dr_full_admin"}
+)
+
+foreach ($user in $emergencyUsers) {
+    $password = ConvertTo-SecureString -String (New-Guid).Guid -AsPlainText -Force
+    
+    # Create AD account
+    New-ADUser -Name $user.Name `
+               -UserPrincipalName "$($user.Name)@corp.example.com" `
+               -Path "OU=Emergency,$domainDN" `
+               -AccountPassword $password `
+               -Enabled $true `
+               -PasswordNeverExpires $true
+    
+    # Add to Splunk local auth
+    & "C:\Program Files\Splunk\bin\splunk.exe" add user $user.Name `
+      -role $user.Role `
+      -password $password `
+      -auth admin:changeme
+}
+```
+
+---
+
+### **Key Usage Notes**:
+1. **Run as Domain Admin**: These scripts require elevated AD permissions
+2. **Pre-production Testing**: Always test in a non-production environment first
+3. **Credential Security**: Store service account passwords in a vault (not in scripts)
+4. **Scheduled Tasks**: Use for regular sync jobs (e.g., weekly role audits)
+
+```powershell
+# Example scheduled task registration
+$action = New-ScheduledTaskAction -Execute "PowerShell.exe" -Argument "-File C:\Scripts\Splunk_AD_Sync.ps1"
+$trigger = New-ScheduledTaskTrigger -Weekly -DaysOfWeek Sunday -At 2am
+Register-ScheduledTask -TaskName "Splunk AD Sync" -Action $action -Trigger $trigger -User "CORP\splunk-task" -Password "P@ssw0rd123!"
+```
+
+Would you like me to provide additional scripts for:
+1. **AD Connect health monitoring**
+2. **Automated DR failover testing**
+3. **AD-integrated Splunk alerting**?
