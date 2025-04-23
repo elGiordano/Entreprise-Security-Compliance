@@ -301,7 +301,7 @@ compliance_tags = {"pci":"true","retention":"365d"}
 ---
 ---
 
-Here's a comprehensive **SOX-compliant field filtering and auditing implementation** for your Splunk financial data controls:
+ **SOX-compliant field filtering and auditing implementation** for our Splunk financial data controls:
 
 ---
 
