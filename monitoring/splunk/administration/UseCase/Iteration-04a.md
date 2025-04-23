@@ -140,4 +140,3 @@ When LDAP is down:
    | rest /services/authentication/providers | search title="ldap_splunk_prod"
    ```
 
-Would you like me to provide specific Active Directory schema examples or OpenLDAP configuration snippets for your directory server?
