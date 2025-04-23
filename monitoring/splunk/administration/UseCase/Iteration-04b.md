@@ -353,4 +353,201 @@ if ($cert.NotAfter -lt (Get-Date).AddDays(30)) {
 
 
 ---
+---
+
+
+**IdP-specific configuration templates** for additional identity providers in our Splunk environment:
+
+---
+
+### **1. Ping Identity Configuration**
+#### **Step 1: Create Splunk Connection**
+```xml
+<!-- PingFed Application Template -->
+<Connection>
+  <Name>Splunk-Prod</Name>
+  <Type>SP</Type>
+  <MetadataUrl>https://splunk.corp.example.com/saml/metadata</MetadataUrl>
+  <AttributeContract>
+    <Attribute name="groups" required="true"/>
+    <Attribute name="email" required="true"/>
+  </AttributeContract>
+</Connection>
+```
+
+#### **Step 2: Configure Attribute Mapping**
+```powershell
+# PowerShell for PingFed attribute sync
+Add-PingIdAttributeMapping -ConnectionName "Splunk-Prod" `
+  -LocalAttribute "groups" `
+  -RemoteAttribute "memberOf" `
+  -Filter "cn=Splunk_*"
+```
+
+#### **Step 3: Certificate Setup**
+```bash
+# Convert certificate for PingFed
+openssl pkcs12 -export -in sp_cert.pem -inkey sp_key.pem -out splunk.pfx -passout pass:ChangeIt!
+```
+
+---
+
+### **2. Google Workspace SAML**
+#### **Step 1: Admin Console Setup
+1. **Google Admin → Security → SAML apps → Add custom app**
+2. Download **Google IdP Metadata**:
+   ```bash
+   wget https://accounts.google.com/o/saml/metadata?id=xxxx -O google_metadata.xml
+   ```
+
+#### **Step 2: Attribute Mapping**
+```yaml
+# Google SAML Attributes
+mapping:
+  primary_email: user.primaryEmail
+  groups: user.organizations
+  name: user.name.fullName
+```
+
+#### **Step 3: Splunk Configuration**
+```ini
+# authentication.conf
+[saml_google]
+entityId = https://splunk.corp.example.com/saml/acs
+idpSSOUrl = https://accounts.google.com/o/saml2/idp?idpid=XXXX
+idpSLORedirectUrl = https://accounts.google.com/logout
+googleDomains = corp.example.com
+```
+
+---
+
+### **3. Custom SAML Implementation**
+#### **Step 1: Minimal Viable Config**
+```ini
+# authentication.conf
+[saml_custom]
+entityId = https://splunk.corp.example.com/saml/acs
+idpSSOUrl = https://idp.example.com/saml/sso
+idpSLOUrl = https://idp.example.com/saml/slo
+signAuthnRequest = false
+signedAssertion = true
+```
+
+#### **Step 2: Metadata Generation**
+```bash
+# Generate SP metadata manually
+echo '<?xml version="1.0"?>
+<md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata"
+  entityID="https://splunk.corp.example.com/saml/acs">
+  <md:SPSSODescriptor protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
+    <md:AssertionConsumerService 
+      Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
+      Location="https://splunk.corp.example.com/saml/acs"
+      index="1"/>
+  </md:SPSSODescriptor>
+</md:EntityDescriptor>' > custom_sp_metadata.xml
+```
+
+---
+
+### **4. Keycloak Configuration**
+#### **Step 1: Client Setup
+```json
+// Keycloak Admin API
+{
+  "clientId": "splunk-prod",
+  "protocol": "saml",
+  "attributes": {
+    "saml.assertion.signature": "true",
+    "saml.force.post.binding": "true",
+    "saml.server.signature": "true"
+  }
+}
+```
+
+#### **Step 2: Mappers Configuration
+```bash
+# Create group mapper
+kcadm.sh create clients/c99999/protocol-mappers/models \
+  -r master \
+  -s name=groups \
+  -s protocolMapper=saml-group-membership-mapper \
+  -s protocol=saml \
+  -s config.\"attribute.name\"=groups \
+  -s config.\"single\"=false
+```
+
+---
+
+### **5. Oracle Identity Cloud Service**
+#### **Step 1: App Configuration
+```yaml
+# Oracle IDCS YAML config
+saml:
+  assertionConsumerUrl: https://splunk.corp.example.com/saml/acs
+  issuerId: https://splunk.corp.example.com
+  attributeMappings:
+    user.login: username
+    groups: GroupMembership
+```
+
+#### **Step 2: Certificate Rotation
+```sql
+-- Oracle DB update for cert rotation
+UPDATE SAML_SP_METADATA 
+SET CERTIFICATE = ? 
+WHERE APP_ID = 'SPLUNK_PROD';
+```
+
+---
+
+### **6. OneLogin Configuration**
+#### **Step 1: Connector Setup
+```ruby
+# OneLogin Ruby SDK
+connector = OneLogin::Api::Connector.new(
+  name: 'Splunk Production',
+  sso: {
+    certificate: File.read('/path/to/cert.pem'),
+    issuer: 'https://splunk.corp.example.com',
+    audience: 'https://app.onelogin.com/saml/metadata/123'
+  }
+)
+connector.save
+```
+
+#### **Step 2: Attribute Mapping
+```xml
+<!-- OneLogin SAML Attributes -->
+<Attribute name="MemberOf" namespace="urn:oasis:names:tc:SAML:2.0:attrname-format:basic">
+  <Value>cn=Splunk_Admins,ou=Groups,dc=corp,dc=example,dc=com</Value>
+</Attribute>
+```
+
+---
+
+### **Implementation Checklist**
+1. [ ] Verify IdP metadata signature validation
+2. [ ] Configure SP-initiated logout in `web.conf`:
+   ```ini
+   [saml]
+   sloEnabled = true
+   logoutUrl = /saml/logout
+   ```
+3. [ ] Test with forced authentication:
+   ```bash
+   curl -k 'https://splunk.corp.example.com/saml/login?forceAuthn=true'
+   ```
+
+---
+
+### **Troubleshooting Commands**
+```bash
+# Validate metadata signatures
+xmlsec1 --verify --id-attr:ID urn:oasis:names:tc:SAML:2.0:metadata:EntityDescriptor metadata.xml
+
+# Decode SAML responses
+saml2aws decode --input saml_response.xml
+```
+
 
