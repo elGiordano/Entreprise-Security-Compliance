@@ -158,4 +158,199 @@ samlExclude = true
 
 ---
 
+ **IdP-specific configuration guides** for SAML authentication in our Splunk environment, covering Okta, Azure AD, and ADFS:
+
+---
+
+### **1. Okta Configuration**
+#### **Step 1: Create Splunk App in Okta**
+1. Navigate to **Applications → Add Application → Create New App**
+2. Select:
+   - **Platform**: Web
+   - **Sign-on method**: SAML 2.0
+
+#### **Step 2: Configure SAML Settings**
+```xml
+<!-- Okta SAML Settings -->
+Single sign-on URL: https://splunk-primary.corp.example.com/saml/acs
+Audience URI (SP Entity ID): https://splunk.corp.example.com/saml/acs
+Name ID Format: EmailAddress
+Attribute Statements:
+  - Name: groups
+    Value: user.groups
+    Filter: Regex (.*)
+```
+
+#### **Step 3: Assign Groups**
+```powershell
+# PowerShell to verify Okta group assignments
+Get-OktaGroup -Name "Splunk_*" | Get-OktaGroupMember
+```
+
+#### **Step 4: Download Metadata**
+```bash
+wget https://corp.okta.com/app/splunkprod/sso/saml/metadata -O okta_metadata.xml
+```
+
+---
+
+### **2. Azure AD Configuration**
+#### **Step 1: Enterprise App Registration
+1. Azure Portal → **Enterprise Applications → New application → Non-gallery application**
+2. Set **Name**: Splunk Production
+
+#### **Step 2: Configure SAML**
+```xml
+<!-- Azure AD SAML Settings -->
+Identifier (Entity ID): https://splunk.corp.example.com/saml/acs
+Reply URL: https://splunk-primary.corp.example.com/saml/acs
+Logout URL: https://splunk-primary.corp.example.com/saml/logout
+Claims:
+  - Unique User Identifier: user.mail
+  - Groups: user.groups
+```
+
+#### **Step 3: Group Claims**
+```json
+// Azure AD Manifest Addition
+"groupMembershipClaims": "SecurityGroup",
+"optionalClaims": {
+    "idToken": [
+        {
+            "name": "groups",
+            "source": null,
+            "essential": false,
+            "additionalProperties": []
+        }
+    ]
+}
+```
+
+#### **Step 4: Certificate Management**
+```powershell
+# Renew SP certificate
+New-AzureADApplicationKeyCredential -ObjectId <app_id> -Type AsymmetricX509Cert -Usage Verify -Value $(Get-Content -Encoding byte -Path sp_cert.pem)
+```
+
+---
+
+### **3. ADFS Configuration**
+#### **Step 1: Relying Party Trust**
+```powershell
+# PowerShell to create trust
+Add-AdfsRelyingPartyTrust `
+    -Name "Splunk Production" `
+    -Identifier "https://splunk.corp.example.com/saml/acs" `
+    -WSFedEndpoint "https://splunk-primary.corp.example.com/saml/acs" `
+    -IssuanceTransformRulesFile 'C:\config\splunk_claims_rules.txt'
+```
+
+#### **Step 2: Claim Rules**
+```text
+@RuleTemplate = "LdapClaims"
+@RuleName = "Splunk Groups"
+c:[Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/windowsaccountname", Issuer == "AD AUTHORITY"]
+=> issue(store = "Active Directory", types = ("http://schemas.xmlsoap.org/claims/Group"), query = "tokenGroups(!(objectClass=computer));", param = "http://schemas.xmlsoap.org/claims/Group");
+```
+
+#### **Step 3: Metadata Export**
+```powershell
+Export-AdfsAuthenticationProviderConfiguration -Name "Splunk" -FilePath "C:\metadata\splunk_adfs_metadata.xml"
+```
+
+---
+
+### **4. Splunk Configuration for All IdPs**
+#### **authentication.conf**
+```ini
+[saml_common]
+entityId = https://splunk.corp.example.com/saml/acs
+signedAssertion = true
+signatureAlgorithm = RSA-SHA256
+nameIDPolicyFormat = urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress
+```
+
+#### **web.conf**
+```ini
+[saml]
+spNameIdFormat = urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress
+sloEnabled = true
+strictAudienceCheck = true
+```
+
+---
+
+### **5. IdP-Specific Troubleshooting**
+#### **Okta Debugging**
+```bash
+splunk cmd diag --saml --idp okta --debug 3
+```
+
+#### **Azure AD Logs**
+```kusto
+AzureADAuditLogs
+| where AppDisplayName == "Splunk Production"
+| project TimeGenerated, ResultType, ResultDescription
+```
+
+#### **ADFS Event Logs**
+```powershell
+Get-WinEvent -LogName "AD FS/Admin" -MaxEvents 100 | Where-Object {$_.Message -like "*Splunk*"}
+```
+
+---
+
+### **6. DR Site Failover Procedures**
+#### **Okta**
+1. Update alternate SP URLs in Okta app:
+   ```text
+   https://splunk-dr1.corp.example.com/saml/acs
+   https://splunk-dr2.corp.example.com/saml/acs
+   ```
+
+#### **Azure AD**
+```powershell
+Set-AzureADApplication -ObjectId <app_id> `
+    -ReplyUrls @("https://splunk-primary.corp.example.com/saml/acs",
+                 "https://splunk-dr1.corp.example.com/saml/acs")
+```
+
+#### **ADFS**
+```powershell
+Set-AdfsRelyingPartyTrust -TargetName "Splunk Production" `
+    -AdditionalWSFedEndpoint "https://splunk-dr1.corp.example.com/saml/acs"
+```
+
+---
+
+### **7. Recommended Monitoring**
+#### **SAML Login Dashboard**
+```sql
+index=_internal source=*saml* 
+| stats count by user, idp, status 
+| timechart span=1h count by status
+```
+
+#### **Certificate Expiry Alert**
+```powershell
+# PowerShell for cert checks
+$cert = Get-PfxCertificate -FilePath C:\saml\sp_cert.pem
+if ($cert.NotAfter -lt (Get-Date).AddDays(30)) {
+    Send-MailMessage -To "splunk-admin@corp.example.com" -Subject "SAML Cert Expiry Warning"
+}
+```
+
+---
+
+### **Key Security Recommendations**
+1. **Enable AlwaysRequireAuthentication** in `web.conf`:
+   ```ini
+   [saml]
+   forceAuthn = true
+   ```
+2. **Implement IP-based restrictions** at IdP level
+3. **Rotate certificates** every 6 months
+
+
+---
 
