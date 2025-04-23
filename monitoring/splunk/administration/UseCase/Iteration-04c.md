@@ -298,4 +298,188 @@ compliance_tags = {"pci":"true","retention":"365d"}
    splunk search "| metadata type=fields" -auth testuser:password
    ```
 
+---
+---
+
+Here's a comprehensive **SOX-compliant field filtering and auditing implementation** for your Splunk financial data controls:
+
+---
+
+### **1. SOX Critical Field Identification**
+#### **Financial Data Taxonomy**
+```ini
+# sox_fields.conf
+[financial_transactions]
+required_fields = transaction_id, timestamp, amount, approver, system_of_record
+sensitive_fields = account_number, routing_number, tax_id, authorization_token
+```
+
+---
+
+### **2. Index-Time Controls (`props.conf`)**
+```ini
+[source::/var/log/erp/*.log]
+TRANSFORMS-sox = mask_account_numbers, hash_approver_ids
+REPORT-sox_fields = extract_sox_metadata
+```
+
+#### **Corresponding `transforms.conf`**
+```ini
+[mask_account_numbers]
+REGEX = \b\d{8,17}\b
+FORMAT = XXXX-XXXX-XXXX-$1
+DEST_KEY = _raw
+
+[hash_approver_ids]
+REGEX = approver_id=(\w+)
+FORMAT = approver_id=SOX-HASH-$1
+DEST_KEY = _raw
+
+[extract_sox_metadata]
+REGEX = (?<sox_control_id>CTRL-\d{4}):(?<sox_process_area>AP|AR|GL)
+```
+
+---
+
+### **3. Role-Based Access Matrix (`authorize.conf`)**
+```ini
+[role_sox_auditor]
+search_filter = NOT _raw="*XXXX-XXXX*"
+required_fields = transaction_id, timestamp, amount, control_id
+whitelist0 = sox_control_id
+whitelist1 = sox_process_area
+
+[role_finance_user]
+blacklist0 = account_number
+blacklist1 = tax_id
+search_sox_override = false
+```
+
+---
+
+### **4. Immutable Audit Logging**
+#### **SOX-Specific Index**
+```ini
+# indexes.conf
+[sox_audit_logs]
+homePath = $SPLUNK_DB/sox_audit/db
+coldPath = $SPLUNK_DB/sox_audit/colddb
+frozenTimePeriodInSecs = 31536000  # 1-year retention
+repFactor = auto
+```
+
+#### **Audit Policy (`audit.conf`)**
+```ini
+[sox_events]
+audit_sox = enabled
+capture_fields = transaction_id, user, timestamp, before_value, after_value
+output = index:sox_audit_logs sourcetype=sox:audit
+```
+
+---
+
+### **5. Segregation of Duties Enforcement**
+#### **User Role Validation**
+```sql
+| rest /services/authentication/users 
+| search roles IN ("approver","payment_processor") 
+| table name, roles 
+| stats count by name 
+| where count > 1
+```
+
+#### **Automated Alert**
+```ini
+# savedsearches.conf
+[SOX - SOD Violation]
+search = | rest /services/authentication/users | search roles IN ("approver","payment_processor") | stats count by name | where count > 1
+action.email.to = sox_team@corp.example.com
+alert.digest_mode = true
+```
+
+---
+
+### **6. Change Management Controls**
+#### **Approval Workflow Integration**
+```python
+#!/usr/bin/env python
+# sox_approval.py
+import splunklib.client as client
+service = client.connect(host='splunk-sox-proxy')
+
+def log_change(user, change_type, justification):
+    service.log_events(
+        index="sox_audit_logs",
+        sourcetype="sox:change",
+        event=f"user={user} change={change_type} justification='{justification}'"
+    )
+```
+
+---
+
+### **7. SOX Dashboard Components**
+#### **Control Effectiveness Monitoring**
+```sql
+| tstats count where index=sox_audit_logs by _time, control_id 
+| timechart span=1d count by control_id
+```
+
+#### **Data Integrity Check**
+```sql
+| metadata type=hosts index=financial_transactions 
+| stats dc(host) as unique_systems 
+| eval sox_compliant=if(unique_systems>1, "FAIL", "PASS")
+```
+
+---
+
+### **8. SmartStore SOX Controls**
+```ini
+# indexes.conf
+[financial_transactions]
+remotePath = volume:sox_encrypted_store/$_index_name
+coldToFrozenDir = /sox_archive/frozen
+frozenTimePeriodInSecs = 2592000  # 30 days
+
+[volume:sox_encrypted_store]
+storageType = remote
+path = s3://sox-compliant-bucket
+sse.type = aws:kms
+sse.keyId = alias/sox_financial_key
+```
+
+---
+
+### **9. SOX Evidence Collection**
+#### **Quarterly Certification Report**
+```sql
+index=sox_audit_logs 
+| stats 
+    dc(user) as "Unique Users",
+    count(eval(match(action,"approve"))) as Approvals,
+    count(eval(match(action,"override"))) as Overrides
+| addtotals
+```
+
+#### **Automated Evidence Export**
+```bash
+#!/bin/bash
+# sox_evidence.sh
+SPLUNK_HOME=/opt/splunk
+TODAY=$(date +%Y%m%d)
+$SPLUNK_HOME/bin/splunk search "index=sox_audit_logs earliest=-90d" \
+  -output csv > sox_evidence_q1_$TODAY.csv
+gpg --encrypt --recipient sox_team sox_evidence_q1_$TODAY.csv
+```
+
+---
+
+### **Implementation Checklist**
+1. [ ] Deploy field masking to all financial source types
+2. [ ] Validate audit log immutability with `| metadata index=sox_audit_logs`
+3. [ ] Test role-based access with:
+   ```bash
+   splunk search "index=financial_transactions | head 1" -auth test_auditor:password
+   ```
+
 
