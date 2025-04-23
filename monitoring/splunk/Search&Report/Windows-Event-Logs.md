@@ -1,4 +1,4 @@
-### **Deep Dive: Windows Event Logs in Splunk for Enterprise Security**  
+### ** Windows Event Logs in Splunk for Enterprise Security**  
 
 Windows Event Logs are a **critical** source of security telemetry in Splunk, providing visibility into authentication, process execution, lateral movement, and more. Below is a structured breakdown of key **Event IDs**, their **security relevance**, and how to analyze them in Splunk.
 
