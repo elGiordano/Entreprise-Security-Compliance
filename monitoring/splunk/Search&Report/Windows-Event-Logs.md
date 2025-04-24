@@ -241,6 +241,6 @@ index=win_events (EventCode=5001) OR (EventCode=4688 (Process="*MsMpEng.exe*" OR
 ---
 
 ### **Final Tips**  
-🔹 **Tune for False Positives** (Adjust thresholds like `count > 5`).  
-🔹 **Enrich with Threat Intel** (Use `lookup` to match IOCs).  
-🔹 **Combine with Sysmon** (For deeper visibility).  
+ **Tune for False Positives** (Adjust thresholds like `count > 5`).  
+ **Enrich with Threat Intel** (Use `lookup` to match IOCs).  
+ **Combine with Sysmon** (For deeper visibility).  
