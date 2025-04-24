@@ -29,7 +29,7 @@ index=sysmon EventID=1
   AND (Image="*\\whoami.exe" OR CommandLine="*net user*") 
 | table _time, host, User, ParentImage, Image, CommandLine
 ```
-✅ **Use Case**: Detects **living-off-the-land (LOLBin)** abuse (e.g., `whoami` or `net user` executed from PowerShell).
+ **Use Case**: Detects **living-off-the-land (LOLBin)** abuse (e.g., `whoami` or `net user` executed from PowerShell).
 
 ---
 
@@ -40,7 +40,7 @@ index=sysmon EventID=10 TargetImage="*\\lsass.exe"
 | where count > 3 AND like(GrantedAccess,"%0x1FFFFF%") 
 | sort - count
 ```
-✅ **Use Case**: Finds **Mimikatz-like credential dumping** (common in ransomware attacks).
+ **Use Case**: Finds **Mimikatz-like credential dumping** (common in ransomware attacks).
 
 ---
 
@@ -51,7 +51,7 @@ index=sysmon EventID=22
 | where IsMalicious="true" 
 | table _time, host, QueryName, IsMalicious
 ```
-✅ **Use Case**: Detects **malware beaconing** via known-bad domains (requires threat intel lookup).
+ **Use Case**: Detects **malware beaconing** via known-bad domains (requires threat intel lookup).
 
 ---
 
@@ -62,7 +62,7 @@ index=sysmon EventID=8
 | stats count by host, SourceImage, TargetImage 
 | sort - count
 ```
-✅ **Use Case**: Finds **malware injecting into trusted processes** (e.g., `explorer.exe`).
+ **Use Case**: Finds **malware injecting into trusted processes** (e.g., `explorer.exe`).
 
 ---
 
@@ -72,24 +72,24 @@ index=sysmon EventID=13
 | search TargetObject="*\\Run\\*" OR TargetObject="*\\RunOnce\\*" 
 | table _time, host, User, TargetObject, Details
 ```
-✅ **Use Case**: Detects **malware persistence via `Run` keys**.
+ **Use Case**: Detects **malware persistence via `Run` keys**.
 
 ---
 
 ## **3. Best Practices for Sysmon in Splunk**
-### **✅ Deploy Sysmon with a Strong Config**
+### ** Deploy Sysmon with a Strong Config**
 - Use **SwiftOnSecurity’s Sysmon config** or **MITRE’s Sysmon Modular** for optimal logging.
 - Log **critical events** (e.g., `EventID 1,3,8,10,22`) without noise.
 
-### **✅ Normalize Sysmon Logs in Splunk**
+### ** Normalize Sysmon Logs in Splunk**
 - Use the **Splunk Add-on for Sysmon** (`TA-microsoft-sysmon`) for proper field extraction.
 - Map fields to **CIM (Common Information Model)** for consistency.
 
-### **✅ Correlate Sysmon with Other Logs**
+### ** Correlate Sysmon with Other Logs**
 - Combine with **Windows Security logs** (`EventID 4688`, `4624`) for better context.
 - Enrich with **EDR data** (e.g., CrowdStrike, SentinelOne).
 
-### **✅ Build Splunk Dashboards for Sysmon**
+### ** Build Splunk Dashboards for Sysmon**
 - **Threat Hunting Dashboard**: Track suspicious process trees, network connections.
 - **Incident Response Dashboard**: Focus on credential dumping, lateral movement.
 
