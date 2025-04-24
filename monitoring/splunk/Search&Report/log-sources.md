@@ -113,6 +113,6 @@ In an enterprise environment, **Splunk** ingests logs from various sources to en
 ---
 
 ### **Best Practices for Log Collection in Splunk**
-✔ **Normalize logs** (use CIM-compliant fields like `src_ip`, `user`).  
-✔ **Filter noise** (exclude irrelevant events to save license costs).  
-✔ **Use Splunk TA (Technology Add-ons)** for parsing (e.g., `TA-microsoft-sysmon`).  
+ **Normalize logs** (use CIM-compliant fields like `src_ip`, `user`).  
+ **Filter noise** (exclude irrelevant events to save license costs).  
+ **Use Splunk TA (Technology Add-ons)** for parsing (e.g., `TA-microsoft-sysmon`).  
