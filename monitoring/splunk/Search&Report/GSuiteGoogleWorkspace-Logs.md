@@ -134,6 +134,3 @@ index=google_workspace log_type=admin event_type=assign_role
 ## **Conclusion**
 By ingesting **Google Workspace logs into Splunk**, security teams gain **real-time visibility** into user activities, detect **insider threats & external attacks**, and meet **compliance requirements**. Follow this guide to set up a robust monitoring framework.
 
-**Next Steps:**
-- [Download the Splunk Google Workspace Add-on](https://splunkbase.splunk.com/app/3084/)
-- [Explore Splunk ES for advanced detection](https://www.splunk.com/en_us/software/enterprise-security.html)
