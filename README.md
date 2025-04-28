@@ -78,57 +78,59 @@ To ensure compliance with industry standards, regulations, and best practices, e
 
 # Enterprise Security Compliance Components
 
+
 ```mermaid
 graph TD
-  A[Enterprise Security Compliance] --> B[Governance & Risk Management]
-  A --> C[Identity & Access Management]
-  A --> D[Data Protection & Privacy]
-  A --> E[Network Security]
-  A --> F[Endpoint Security]
-  A --> G[Application Security]
-  A --> H[Monitoring & Logging]
-  A --> I[Physical Security]
-  A --> J[Compliance-Specific]
-  A --> K[Employee Awareness]
+    A[Enterprise Security Compliance] --> B[Governance & Risk Management]
+    A --> C[Identity & Access Management]
+    A --> D[Data Protection & Privacy]
+    A --> E[Network Security]
+    A --> F[Endpoint & Device Security]
+    A --> G[Application Security]
+    A --> H[Monitoring & Logging]
+    A --> I[Physical Security]
+    A --> J[Compliance-Specific]
+    A --> K[Employee Awareness]
 
-  B --> B1(Security Policies)
-  B --> B2(Risk Assessments)
-  B --> B3(Incident Response Plan)
+    B --> B1[Security Policies]
+    B --> B2[Risk Assessments]
+    B --> B3[Incident Response Plan]
 
-  C --> C1(MFA/SSO)
-  C --> C2(RBAC/PAM)
-  C --> C3(IGA)
+    C --> C1[MFA/SSO]
+    C --> C2[RBAC/PAM]
+    C --> C3[Identity Governance]
 
-  D --> D1(Encryption)
-  D --> D2(DLP)
-  D --> D3(Data Classification)
+    D --> D1[Encryption]
+    D --> D2[DLP]
+    D --> D3[Backup & Recovery]
 
-  E --> E1(Firewalls)
-  E --> E2(IDS/IPS)
-  E --> E3(Zero Trust)
+    E --> E1[Firewalls]
+    E --> E2[IDS/IPS]
+    E --> E3[Zero Trust]
 
-  F --> F1(EDR/XDR)
-  F --> F2(Patch Management)
-  F --> F3(MDM)
+    F --> F1[EDR/XDR]
+    F --> F2[Patch Management]
+    F --> F3[Antivirus]
 
-  G --> G1(SAST/DAST)
-  G --> G2(WAF)
-  G --> G3(Secure SDLC)
+    G --> G1[SAST/DAST]
+    G --> G2[WAF]
+    G --> G3[API Security]
 
-  H --> H1(SIEM)
-  H --> H2(UEBA)
-  H --> H3(SOAR)
+    H --> H1[SIEM]
+    H --> H2[UEBA]
+    H --> H3[Threat Hunting]
 
-  I --> I1(Biometric Access)
-  I --> I2(CCTV)
-  I --> I3(Environmental Controls)
+    I --> I1[Biometric Access]
+    I --> I2[CCTV]
+    I --> I3[Secure Data Centers]
 
-  J --> J1(GDPR)
-  J --> J2(HIPAA)
-  J --> J3(PCI-DSS)
+    J --> J1[GDPR]
+    J --> J2[HIPAA]
+    J --> J3[PCI-DSS]
 
-  K --> K1(Security Training)
-  K --> K2(Phishing Simulations)
+    K --> K1[Security Training]
+    K --> K2[Phishing Simulations]
+    K --> K3[Compliance Workshops]
 
 ```
 
