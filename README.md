@@ -128,16 +128,16 @@ Achieving compliance in an enterprise requires implementing a comprehensive set 
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': { 'fontSize': '20px'}}}%%
 flowchart TD
-    A[🛡️ Governance & Compliance\n Policies & Procedures\n Risk Management\n Compliance Audits\n BCP/DRP\n Employee Training] --> B[🔒 Data Security\n Encryption\n DLP\n Privacy Controls]
-    A --> C[🔑 Access Control & IAM\n MFA\n PAM\n RBAC\n SSO]
-    B --> D[🌐 Network Security\n Firewalls\n IDS/IPS\n VPN\n Segmentation]
-    C --> E[💻 Endpoint Security\n EDR/XDR\n MDM\n Antivirus]
-    D --> F[🚨 Monitoring & IR\n SIEM\n Incident Response\n Forensics]
+    A[🛡️ Governance & Compliance"" Policies & Procedures"" Risk Management"" Compliance Audits"" BCP/DRP"" Employee Training] --> B[🔒 Data Security"" Encryption"" DLP"" Privacy Controls]
+    A --> C[🔑 Access Control & IAM"" MFA"" PAM"" RBAC"" SSO]
+    B --> D[🌐 Network Security"" Firewalls"" IDS/IPS"" VPN"" Segmentation]
+    C --> E[💻 Endpoint Security"" EDR/XDR"" MDM"" Antivirus]
+    D --> F[🚨 Monitoring & IR"" SIEM"" Incident Response"" Forensics]
     E --> F
     B --> F
     C --> F
-    G[☁️ Application & Cloud\n• SAST/DAST\n• CSPM\n• WAF] --> F
-    H[🏢 Physical Security\n• Biometrics\n• CCTV\n• Access Logs] --> F
+    G[☁️ Application & Cloud""• SAST/DAST""• CSPM""• WAF] --> F
+    H[🏢 Physical Security""• Biometrics""• CCTV""• Access Logs] --> F
 ```
 
 Enterprises must tailor these security components based on their industry, regulatory requirements, and risk profile. Regular audits, continuous monitoring, and updates are essential to maintaining compliance with evolving standards like **GDPR, CCPA, NIS2, and emerging AI regulations**.
