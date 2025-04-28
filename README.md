@@ -76,49 +76,40 @@ To ensure compliance with industry standards, regulations, and best practices, e
 
 
 
-┌───────────────────────────────────────────────────────────────────────────────┐
-│                     ENTERPRISE SECURITY COMPLIANCE OVERVIEW                    │
-└───────────────────────────────────────────────────────────────────────────────┘
+```mermaid
+%% Enterprise Security Compliance Framework
+%% Compatible with GitHub Markdown
+flowchart TD
+    A[Enterprise Security Compliance] --> B[Governance & Risk]
+    A --> C[IAM]
+    A --> D[Data Protection]
+    A --> E[Network Security]
+    A --> F[Endpoint Security]
+    A --> G[App Security]
+    A --> H[Monitoring]
+    A --> I[Physical Security]
+    A --> J[Compliance]
+    A --> K[Training]
 
-  ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-  │  GOVERNANCE &   │    │IDENTITY & ACCESS│    │ DATA PROTECTION │
-  │ RISK MANAGEMENT │    │  MANAGEMENT     │    │  & PRIVACY     │
-  └────────┬────────┘    └────────┬────────┘    └────────┬────────┘
-           │                      │                      │
-           ▼                      ▼                      ▼
-┌───────────────────────┐ ┌─────────────────┐ ┌───────────────────────┐
-│ - Policies & Procedures│ │ - MFA/SSO      │ │ - Encryption (At Rest,│
-│ - Compliance Audits   │ │ - RBAC/PAM     │ │   In Transit)        │
-│ - Incident Response  │ │ - IGA          │ │ - DLP               │
-└───────────────────────┘ └─────────────────┘ └───────────────────────┘
+    B --> B1["• Policies & Procedures<br>• Compliance Audits<br>• Incident Response"]
+    C --> C1["• MFA/SSO<br>• RBAC/PAM<br>• IGA"]
+    D --> D1["• Encryption<br>• DLP<br>• Data Classification"]
+    E --> E1["• Firewalls<br>• IDS/IPS<br>• Zero Trust"]
+    F --> F1["• EDR/XDR<br>• Patch Mgmt<br>• MDM"]
+    G --> G1["• Secure SDLC<br>• SAST/DAST<br>• API Security"]
+    H --> H1["• SIEM/SOAR<br>• UEBA<br>• Log Retention"]
+    I --> I1["• Biometrics<br>• CCTV<br>• Access Controls"]
+    J --> J1["• GDPR/HIPAA<br>• PCI-DSS<br>• ISO 27001"]
+    K --> K1["• Security Training<br>• Phishing Sims<br>• Compliance Certs"]
 
-  ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-  │ NETWORK SECURITY│    │ ENDPOINT SECURITY│   │APP SECURITY     │
-  └────────┬────────┘    └────────┬────────┘    └────────┬────────┘
-           │                      │                      │
-           ▼                      ▼                      ▼
-┌───────────────────────┐ ┌─────────────────┐ ┌───────────────────────┐
-│ - Firewalls (NGFW/WAF)│ │ - EDR/XDR      │ │ - Secure SDLC        │
-│ - IDS/IPS            │ │ - Patch Mgmt.  │ │ - SAST/DAST         │
-│ - Zero Trust        │ │ - MDM          │ │ - API Security      │
-└───────────────────────┘ └─────────────────┘ └───────────────────────┘
-
-  ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-  │ MONITORING &    │    │ PHYSICAL SECURITY│   │ COMPLIANCE      │
-  │ LOGGING         │    │                 │   │ STANDARDS       │
-  └────────┬────────┘    └────────┬────────┘    └────────┬────────┘
-           │                      │                      │
-           ▼                      ▼                      ▼
-┌───────────────────────┐ ┌─────────────────┐ ┌───────────────────────┐
-│ - SIEM/SOAR          │ │ - Biometric     │ │ - GDPR/HIPAA/PCI-DSS │
-│ - UEBA               │ │ - CCTV/Access   │ │ - ISO 27001/NIST CSF│
-│ - Log Retention      │ │ - Secure DC     │ │ - SOC 2             │
-└───────────────────────┘ └─────────────────┘ └───────────────────────┘
-
-  ┌─────────────────────────────────────────────────────────────────────┐
-  │                    EMPLOYEE AWARENESS & TRAINING                    │
-  │ - Security Training - Phishing Simulations - Compliance Certifications│
-  └─────────────────────────────────────────────────────────────────────┘
+    %% Styling (optional - GitHub may not render)
+    classDef header fill:#2e3440,stroke:#2e3440,color:#fff
+    classDef domain fill:#5e81ac,stroke:#2e3440,color:#fff
+    classDef controls fill:#88c0d0,stroke:#2e3440
+    class A header
+    class B,C,D,E,F,G,H,I,J,K domain
+    class B1,C1,D1,E1,F1,G1,H1,I1,J1,K1 controls
+```
 
 
 
