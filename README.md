@@ -126,7 +126,7 @@ Achieving compliance in an enterprise requires implementing a comprehensive set 
 
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'fontSize': '20px'}}}%%
+%%{init: {'theme': 'neutral', 'themeVariables': { 'fontSize': '24px', 'primaryColor': '#f0f0f0', 'edgeLabelBackground':'#ffffff'}}}%%
 flowchart TD
     A[🛡️ Governance & Compliance"" Policies & Procedures"" Risk Management"" Compliance Audits"" BCP/DRP"" Employee Training] --> B[🔒 Data Security"" Encryption"" DLP"" Privacy Controls]
     A --> C[🔑 Access Control & IAM"" MFA"" PAM"" RBAC"" SSO]
