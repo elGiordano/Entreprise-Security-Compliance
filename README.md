@@ -126,58 +126,18 @@ Achieving compliance in an enterprise requires implementing a comprehensive set 
 
 
 ```mermaid
-graph TD
-    A[Enterprise Security Compliance] --> B[Governance & Risk Management]
-    A --> C[Identity & Access Management]
-    A --> D[Data Protection & Privacy]
-    A --> E[Network Security]
-    A --> F[Endpoint & Device Security]
-    A --> G[Application Security]
-    A --> H[Monitoring & Logging]
-    A --> I[Physical Security]
-    A --> J[Compliance-Specific]
-    A --> K[Employee Awareness]
-
-    B --> B1[Security Policies]
-    B --> B2[Risk Assessments]
-    B --> B3[Incident Response Plan]
-
-    C --> C1[MFA/SSO]
-    C --> C2[RBAC/PAM]
-    C --> C3[Identity Governance]
-
-    D --> D1[Encryption]
-    D --> D2[DLP]
-    D --> D3[Backup & Recovery]
-
-    E --> E1[Firewalls]
-    E --> E2[IDS/IPS]
-    E --> E3[Zero Trust]
-
-    F --> F1[EDR/XDR]
-    F --> F2[Patch Management]
-    F --> F3[Antivirus]
-
-    G --> G1[SAST/DAST]
-    G --> G2[WAF]
-    G --> G3[API Security]
-
-    H --> H1[SIEM]
-    H --> H2[UEBA]
-    H --> H3[Threat Hunting]
-
-    I --> I1[Biometric Access]
-    I --> I2[CCTV]
-    I --> I3[Secure Data Centers]
-
-    J --> J1[GDPR]
-    J --> J2[HIPAA]
-    J --> J3[PCI-DSS]
-
-    K --> K1[Security Training]
-    K --> K2[Phishing Simulations]
-    K --> K3[Compliance Workshops]
-
+%%{init: {'theme': 'base', 'themeVariables': { 'fontSize': '20px'}}}%%
+flowchart TD
+    A[🛡️ Governance & Compliance\n• Policies & Procedures\n• Risk Management\n• Compliance Audits\n• BCP/DRP\n• Employee Training] --> B[🔒 Data Security\n• Encryption\n• DLP\n• Privacy Controls]
+    A --> C[🔑 Access Control & IAM\n• MFA\n• PAM\n• RBAC\n• SSO]
+    B --> D[🌐 Network Security\n• Firewalls\n• IDS/IPS\n• VPN\n• Segmentation]
+    C --> E[💻 Endpoint Security\n• EDR/XDR\n• MDM\n• Antivirus]
+    D --> F[🚨 Monitoring & IR\n• SIEM\n• Incident Response\n• Forensics]
+    E --> F
+    B --> F
+    C --> F
+    G[☁️ Application & Cloud\n• SAST/DAST\n• CSPM\n• WAF] --> F
+    H[🏢 Physical Security\n• Biometrics\n• CCTV\n• Access Logs] --> F
 ```
 
 Enterprises must tailor these security components based on their industry, regulatory requirements, and risk profile. Regular audits, continuous monitoring, and updates are essential to maintaining compliance with evolving standards like **GDPR, CCPA, NIS2, and emerging AI regulations**.
