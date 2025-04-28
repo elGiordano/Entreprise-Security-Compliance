@@ -76,42 +76,61 @@ To ensure compliance with industry standards, regulations, and best practices, e
 
 
 
+# Enterprise Security Compliance Components
+
 ```mermaid
-%% Enterprise Security Compliance Framework
-%% Compatible with GitHub Markdown
-flowchart TD
-    A[Enterprise Security Compliance] --> B[Governance & Risk]
-    A --> C[IAM]
-    A --> D[Data Protection]
-    A --> E[Network Security]
-    A --> F[Endpoint Security]
-    A --> G[App Security]
-    A --> H[Monitoring]
-    A --> I[Physical Security]
-    A --> J[Compliance]
-    A --> K[Training]
+graph TD
+  A[Enterprise Security Compliance] --> B[Governance & Risk Management]
+  A --> C[Identity & Access Management]
+  A --> D[Data Protection & Privacy]
+  A --> E[Network Security]
+  A --> F[Endpoint Security]
+  A --> G[Application Security]
+  A --> H[Monitoring & Logging]
+  A --> I[Physical Security]
+  A --> J[Compliance-Specific]
+  A --> K[Employee Awareness]
 
-    B --> B1["• Policies & Procedures<br>• Compliance Audits<br>• Incident Response"]
-    C --> C1["• MFA/SSO<br>• RBAC/PAM<br>• IGA"]
-    D --> D1["• Encryption<br>• DLP<br>• Data Classification"]
-    E --> E1["• Firewalls<br>• IDS/IPS<br>• Zero Trust"]
-    F --> F1["• EDR/XDR<br>• Patch Mgmt<br>• MDM"]
-    G --> G1["• Secure SDLC<br>• SAST/DAST<br>• API Security"]
-    H --> H1["• SIEM/SOAR<br>• UEBA<br>• Log Retention"]
-    I --> I1["• Biometrics<br>• CCTV<br>• Access Controls"]
-    J --> J1["• GDPR/HIPAA<br>• PCI-DSS<br>• ISO 27001"]
-    K --> K1["• Security Training<br>• Phishing Sims<br>• Compliance Certs"]
+  B --> B1(Security Policies)
+  B --> B2(Risk Assessments)
+  B --> B3(Incident Response Plan)
 
-    %% Styling (optional - GitHub may not render)
-    classDef header fill:#2e3440,stroke:#2e3440,color:#fff
-    classDef domain fill:#5e81ac,stroke:#2e3440,color:#fff
-    classDef controls fill:#88c0d0,stroke:#2e3440
-    class A header
-    class B,C,D,E,F,G,H,I,J,K domain
-    class B1,C1,D1,E1,F1,G1,H1,I1,J1,K1 controls
+  C --> C1(MFA/SSO)
+  C --> C2(RBAC/PAM)
+  C --> C3(IGA)
+
+  D --> D1(Encryption)
+  D --> D2(DLP)
+  D --> D3(Data Classification)
+
+  E --> E1(Firewalls)
+  E --> E2(IDS/IPS)
+  E --> E3(Zero Trust)
+
+  F --> F1(EDR/XDR)
+  F --> F2(Patch Management)
+  F --> F3(MDM)
+
+  G --> G1(SAST/DAST)
+  G --> G2(WAF)
+  G --> G3(Secure SDLC)
+
+  H --> H1(SIEM)
+  H --> H2(UEBA)
+  H --> H3(SOAR)
+
+  I --> I1(Biometric Access)
+  I --> I2(CCTV)
+  I --> I3(Environmental Controls)
+
+  J --> J1(GDPR)
+  J --> J2(HIPAA)
+  J --> J3(PCI-DSS)
+
+  K --> K1(Security Training)
+  K --> K2(Phishing Simulations)
+
 ```
-
-
 
 Enterprises must tailor these security components based on their industry, regulatory requirements, and risk profile. Regular audits, continuous monitoring, and updates are essential to maintaining compliance with evolving standards like **GDPR, CCPA, NIS2, and emerging AI regulations**.
 
