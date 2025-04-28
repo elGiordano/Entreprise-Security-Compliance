@@ -161,7 +161,7 @@ graph TD
 
 Enterprises must tailor these security components based on their industry, regulatory requirements, and risk profile. Regular audits, continuous monitoring, and updates are essential to maintaining compliance with evolving standards like **GDPR, CCPA, NIS2, and emerging AI regulations**.
 
-```plantuml
+```uml
 @startuml Enterprise Security Architecture - Compliance Venn Diagram
 
 !define Compliance #FFD700
