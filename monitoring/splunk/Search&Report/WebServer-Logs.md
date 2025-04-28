@@ -285,11 +285,11 @@ index=web_logs
 ---
 
 ## **4. Best Practices for Web Log Analysis**
-✅ **Normalize Fields** (e.g., `client_ip`, `uri_path`, `user_agent`)  
-✅ **Enrich with Threat Intel** (e.g., known malicious IPs, TOR exit nodes)  
-✅ **Use CIM (Common Information Model)** for consistent field mapping  
-✅ **Store in a Dedicated Index** (`web_logs`) for retention & performance  
-✅ **Automate Blocking** (via Splunk + Firewall/WAF integration)  
+ **Normalize Fields** (e.g., `client_ip`, `uri_path`, `user_agent`)  
+ **Enrich with Threat Intel** (e.g., known malicious IPs, TOR exit nodes)  
+ **Use CIM (Common Information Model)** for consistent field mapping  
+ **Store in a Dedicated Index** (`web_logs`) for retention & performance  
+ **Automate Blocking** (via Splunk + Firewall/WAF integration)  
 
 ---
 
