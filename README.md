@@ -127,17 +127,88 @@ Achieving compliance in an enterprise requires implementing a comprehensive set 
 
 ```mermaid
 %%{init: {'theme': 'neutral', 'themeVariables': { 'fontSize': '24px', 'primaryColor': '#f0f0f0', 'edgeLabelBackground':'#ffffff'}}}%%
+%% Enterprise Security Compliance Framework (Mermaid v10.6.0)
 flowchart TD
-    A[🛡️ Governance & Compliance"" Policies & Procedures"" Risk Management"" Compliance Audits"" BCP/DRP"" Employee Training] --> B[🔒 Data Security"" Encryption"" DLP"" Privacy Controls]
-    A --> C[🔑 Access Control & IAM"" MFA"" PAM"" RBAC"" SSO]
-    B --> D[🌐 Network Security"" Firewalls"" IDS/IPS"" VPN"" Segmentation]
-    C --> E[💻 Endpoint Security"" EDR/XDR"" MDM"" Antivirus]
-    D --> F[🚨 Monitoring & IR"" SIEM"" Incident Response"" Forensics]
-    E --> F
-    B --> F
-    C --> F
-    G[☁️ Application & Cloud""• SAST/DAST""• CSPM""• WAF] --> F
-    H[🏢 Physical Security""• Biometrics""• CCTV""• Access Logs] --> F
+    %% ========== Governance Layer ==========
+    Governance["Governance & Compliance
+    (Policies, Risk Mgmt, Audits, Training, BCP/DRP)"]
+
+    %% ========== IAM Core ==========
+    IAM["Identity & Access Mgmt (IAM)
+    - MFA
+    - PAM
+    - RBAC
+    - SSO"]
+
+    %% ========== Security Domains ==========
+    DataSec["Data Security
+    - Encryption
+    - DLP
+    - Key Mgmt"]
+    
+    Network["Network Security
+    - Firewalls
+    - IDS/IPS
+    - Segmentation"]
+    
+    Endpoint["Endpoint Security
+    - EDR/XDR
+    - MDM
+    - Patch Mgmt"]
+    
+    AppSec["Application Security
+    - SAST/DAST
+    - WAF
+    - Secure SDLC"]
+
+    %% ========== Infrastructure ==========
+    Cloud["Cloud & Physical Security
+    - CSPM/CASB
+    - HSM
+    - CCTV"]
+
+    %% ========== Monitoring ==========
+    Monitoring["Monitoring & IR
+    - SIEM
+    - SOAR
+    - Threat Intel"]
+
+    %% ========== Regulation Overlays ==========
+    Regulations["Regulatory Overlays
+    🛡️ NIST | 🔒 GDPR | 💳 PCI-DSS | 🏥 HIPAA"]
+
+    %% ========== Connections ==========
+    Governance --> IAM
+    IAM --> DataSec
+    IAM --> Network
+    IAM --> Endpoint
+    IAM --> AppSec
+    DataSec --> Cloud
+    Network --> Cloud
+    Endpoint --> Cloud
+    AppSec --> Cloud
+    Cloud --> Monitoring
+    Monitoring --> Governance
+
+    Regulations -.-> DataSec
+    Regulations -.-> Network
+    Regulations -.-> AppSec
+
+    %% ========== Styling ==========
+    classDef governance fill:#2ecc71,stroke:#27ae60,color:white
+    classDef iam fill:#3498db,stroke:#2980b9,color:white
+    classDef security fill:#e74c3c,stroke:#c0392b,color:white
+    classDef infra fill:#9b59b6,stroke:#8e44ad,color:white
+    classDef monitor fill:#f39c12,stroke:#d35400,color:white
+    classDef regulation fill:#95a5a6,stroke:#7f8c8d,color:black
+
+    class Governance governance
+    class IAM iam
+    class DataSec,Network,Endpoint,AppSec security
+    class Cloud infra
+    class Monitoring monitor
+    class Regulations regulation
+
 ```
 
 Enterprises must tailor these security components based on their industry, regulatory requirements, and risk profile. Regular audits, continuous monitoring, and updates are essential to maintaining compliance with evolving standards like **GDPR, CCPA, NIS2, and emerging AI regulations**.
