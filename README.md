@@ -126,89 +126,37 @@ Achieving compliance in an enterprise requires implementing a comprehensive set 
 
 
 ```mermaid
-%%{init: {'theme': 'neutral', 'themeVariables': { 'fontSize': '24px', 'primaryColor': '#f0f0f0', 'edgeLabelBackground':'#ffffff'}}}%%
-%% Enterprise Security Compliance Framework (Mermaid v10.6.0)
-flowchart TD
-    %% ========== Governance Layer ==========
-    Governance["Governance & Compliance
-    (Policies, Risk Mgmt, Audits, Training, BCP/DRP)"]
+%% Enterprise Compliance Security Architecture
+graph TD
+    %% Governance Layer
+    A[Governance & Risk Management] -->|Inputs to| B[Identity & Access Mgmt]
+    A -->|Defines Policies| C[Data Security]
+    A -->|Audits| D[Network Security]
 
-    %% ========== IAM Core ==========
-    IAM["Identity & Access Mgmt (IAM)
-    - MFA
-    - PAM
-    - RBAC
-    - SSO"]
+    %% Data Layer
+    C -->|Encrypts Traffic| D
+    C -->|Protects| E[Application Security]
+    C -->|DLP for| F[Cloud Security]
 
-    %% ========== Security Domains ==========
-    DataSec["Data Security
-    - Encryption
-    - DLP
-    - Key Mgmt"]
-    
-    Network["Network Security
-    - Firewalls
-    - IDS/IPS
-    - Segmentation"]
-    
-    Endpoint["Endpoint Security
-    - EDR/XDR
-    - MDM
-    - Patch Mgmt"]
-    
-    AppSec["Application Security
-    - SAST/DAST
-    - WAF
-    - Secure SDLC"]
+    %% Access Layer
+    B -->|Controls Access| D
+    B -->|PAM for| G[Endpoint Security]
+    B -->|SSO/MFA| E
 
-    %% ========== Infrastructure ==========
-    Cloud["Cloud & Physical Security
-    - CSPM/CASB
-    - HSM
-    - CCTV"]
+    %% Network Layer
+    D -->|Segments| F
+    D -->|IDS/IPS| H[Monitoring & IR]
 
-    %% ========== Monitoring ==========
-    Monitoring["Monitoring & IR
-    - SIEM
-    - SOAR
-    - Threat Intel"]
+    %% Cross-Cutting
+    H -->|Alerts| A
+    G -->|EDR Logs| H
+    E -->|SAST/DAST| H
+    F -->|CSPM Feeds| H
 
-    %% ========== Regulation Overlays ==========
-    Regulations["Regulatory Overlays
-    🛡️ NIST | 🔒 GDPR | 💳 PCI-DSS | 🏥 HIPAA"]
-
-    %% ========== Connections ==========
-    Governance --> IAM
-    IAM --> DataSec
-    IAM --> Network
-    IAM --> Endpoint
-    IAM --> AppSec
-    DataSec --> Cloud
-    Network --> Cloud
-    Endpoint --> Cloud
-    AppSec --> Cloud
-    Cloud --> Monitoring
-    Monitoring --> Governance
-
-    Regulations -.-> DataSec
-    Regulations -.-> Network
-    Regulations -.-> AppSec
-
-    %% ========== Styling ==========
-    classDef governance fill:#2ecc71,stroke:#27ae60,color:white
-    classDef iam fill:#3498db,stroke:#2980b9,color:white
-    classDef security fill:#e74c3c,stroke:#c0392b,color:white
-    classDef infra fill:#9b59b6,stroke:#8e44ad,color:white
-    classDef monitor fill:#f39c12,stroke:#d35400,color:white
-    classDef regulation fill:#95a5a6,stroke:#7f8c8d,color:black
-
-    class Governance governance
-    class IAM iam
-    class DataSec,Network,Endpoint,AppSec security
-    class Cloud infra
-    class Monitoring monitor
-    class Regulations regulation
-
+    %% Physical & Human
+    I[Physical Security] -->|Protects| G
+    J[Employee Training] -->|Impacts| A
+    J -->|Reduces| K[Phishing Risks]
 ```
 
 Enterprises must tailor these security components based on their industry, regulatory requirements, and risk profile. Regular audits, continuous monitoring, and updates are essential to maintaining compliance with evolving standards like **GDPR, CCPA, NIS2, and emerging AI regulations**.
