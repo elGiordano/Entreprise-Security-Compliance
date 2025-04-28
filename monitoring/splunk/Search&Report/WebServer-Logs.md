@@ -158,3 +158,147 @@ index=web_logs sourcetype=apache:access
  **Retain Logs for Forensics** (90+ days recommended).  
 
 ---
+
+# **Web Server Logs in Splunk: Security Monitoring & Threat Detection Guide**
+
+Web server logs provide critical insights into **web traffic, attacks, and user behavior**. When ingested into **Splunk**, they enable **real-time security monitoring, anomaly detection, and incident response**. Below is a **comprehensive guide** to analyzing **Apache, Nginx, IIS, and other web server logs** in Splunk for security purposes.
+
+---
+
+## **1. Key Web Server Log Sources**
+| **Web Server** | **Default Log Location**          | **Key Fields**                     |
+|---------------|----------------------------------|-----------------------------------|
+| **Apache**    | `/var/log/apache2/access.log`    | `client_ip, status_code, user_agent, request` |
+| **Nginx**     | `/var/log/nginx/access.log`      | `remote_addr, http_referer, request` |
+| **IIS**       | `%SystemDrive%\inetpub\logs\LogFiles\` | `c-ip, cs-method, cs-uri-stem, sc-status` |
+| **Cloud (AWS ALB, Cloudflare)** | Varies (API/S3) | `http.request.method, http.user_agent, src_ip` |
+
+---
+
+## **2. Critical Security Detection Use Cases**
+### **1. Web Attacks (OWASP Top 10)**
+#### **SQL Injection (SQLi)**
+```splunk
+index=web_logs (http_method=POST OR http_method=GET)
+| regex request=".*([';]+\s*(SELECT|UNION|DROP|INSERT|DELETE|UPDATE|EXEC).*)" 
+| stats count by client_ip, request, user_agent
+```
+
+#### **Cross-Site Scripting (XSS)**
+```splunk
+index=web_logs 
+| regex request=".*(<script|javascript:|onerror=|alert\().*"
+| table _time, client_ip, request, user_agent
+```
+
+#### **Local/Remote File Inclusion (LFI/RFI)**
+```splunk
+index=web_logs 
+| regex request=".*(\.\./|etc/passwd|php://input|http://).*"
+| stats count by client_ip, request
+```
+
+### **2. Brute Force & Credential Stuffing**
+#### **Login Page Attacks**
+```splunk
+index=web_logs uri_path="/login" 
+| stats 
+  count(eval(status_code=401)) as failed_logins, 
+  count(eval(status_code=200)) as success_logins 
+  by client_ip 
+| where failed_logins > 5 
+| sort - failed_logins
+```
+
+#### **WordPress XML-RPC Abuse**
+```splunk
+index=web_logs uri_path="/xmlrpc.php" 
+| stats count by client_ip 
+| where count > 20  // Common in brute force attacks
+```
+
+### **3. Suspicious Bots & Scanners**
+#### **Bad User Agents (Automated Scanners)**
+```splunk
+index=web_logs 
+| search user_agent="*sqlmap*" OR user_agent="*nikto*" OR user_agent="*hydra*" 
+| stats count by client_ip, user_agent
+```
+
+#### **Web Vulnerability Scanners**
+```splunk
+index=web_logs 
+| regex user_agent="(Acunetix|Nessus|Burp Suite|OWASP ZAP)" 
+| table _time, client_ip, user_agent, request
+```
+
+### **4. Data Exfiltration & Unusual Traffic**
+#### **Large File Downloads (Data Theft)**
+```splunk
+index=web_logs status_code=200 
+| eval response_size_kb = bytes/1024 
+| where response_size_kb > 10240  // 10MB+ files
+| stats sum(response_size_kb) as total_downloaded by client_ip
+```
+
+#### **Unusual Outbound Connections (C2 Traffic)**
+```splunk
+index=web_logs 
+| lookup threat_intel_ip client_ip OUTPUT threat_desc 
+| where isnotnull(threat_desc) 
+| table _time, client_ip, threat_desc, request
+```
+
+---
+
+## **3. Advanced Correlation & Anomaly Detection**
+### **1. Impossible Travel (Session Hijacking)**
+```splunk
+index=web_logs 
+| iplocation client_ip 
+| stats 
+  earliest(_time) as first_request, 
+  latest(_time) as last_request, 
+  values(country) as countries 
+  by session_id 
+| eval time_diff = (last_request - first_request)/3600 
+| where time_diff < 2 AND mvcount(countries) > 1
+```
+
+### **2. Zero-Day Exploit Detection (Anomalous Requests)**
+```splunk
+index=web_logs 
+| anomalydetect method=avg request_length by client_ip 
+| where isoutlier=1 
+| table _time, client_ip, request, status_code
+```
+
+### **3. DDoS & Rate Limiting**
+```splunk
+index=web_logs 
+| bin _time span=1m 
+| stats count by client_ip, _time 
+| where count > 1000  // 1000+ requests/min
+| sort - count
+```
+
+---
+
+## **4. Best Practices for Web Log Analysis**
+✅ **Normalize Fields** (e.g., `client_ip`, `uri_path`, `user_agent`)  
+✅ **Enrich with Threat Intel** (e.g., known malicious IPs, TOR exit nodes)  
+✅ **Use CIM (Common Information Model)** for consistent field mapping  
+✅ **Store in a Dedicated Index** (`web_logs`) for retention & performance  
+✅ **Automate Blocking** (via Splunk + Firewall/WAF integration)  
+
+---
+
+## **5. Sample Splunk Dashboard Panels**
+| **Panel**                     | **SPL Query**                          |
+|-------------------------------|---------------------------------------|
+| **Top Attackers**            | `index=web_logs | top client_ip`       |
+| **Failed Login Trends**      | `index=web_logs status_code=401 | timechart count` |
+| **Malicious User Agents**    | `index=web_logs | regex user_agent="(sqlmap|nikto)"` |
+| **Unusual HTTP Methods**     | `index=web_logs | rare http_method`    |
+
+---
