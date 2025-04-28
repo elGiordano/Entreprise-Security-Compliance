@@ -1,3 +1,4 @@
+
 # **GSuite / Google Workspace Logs in Splunk: Comprehensive Security Monitoring Guide**
 
 Integrating **Google Workspace (formerly GSuite)** logs into **Splunk** enables organizations to monitor user activities, detect security threats, and ensure compliance. This guide covers best practices for collecting, parsing, and analyzing Google Workspace logs in Splunk for security monitoring.
@@ -134,3 +135,157 @@ index=google_workspace log_type=admin event_type=assign_role
 ## **Conclusion**
 By ingesting **Google Workspace logs into Splunk**, security teams gain **real-time visibility** into user activities, detect **insider threats & external attacks**, and meet **compliance requirements**. Follow this guide to set up a robust monitoring framework.
 
+--- 
+
+# **Critical Detection Use Cases for Google Workspace Logs in Splunk**
+
+Monitoring **Google Workspace (GSuite)** logs in **Splunk** is essential for detecting security threats, insider risks, and compliance violations. Below are the **most critical detection use cases**, along with **Splunk SPL queries** and **best practices** for implementation.
+
+---
+
+## **1. Account Takeover & Credential Compromise**
+### **Detection Scenarios**
+- **Brute Force Attacks** (Multiple failed logins followed by success)
+- **Impossible Travel** (Logins from geographically distant locations in a short time)
+- **Suspicious IPs** (Logins from Tor, VPNs, or known malicious IPs)
+- **Phishing Success** (Logins from phishing-prone regions)
+
+### **SPL Queries**
+#### **Brute Force Detection**
+```splunk
+index=google_workspace log_type=login 
+| stats 
+  count(eval(status="FAILED")) as failed_logins, 
+  count(eval(status="SUCCESS")) as successful_logins, 
+  earliest(_time) as first_attempt, 
+  latest(_time) as last_attempt 
+  by user, src_ip 
+| where failed_logins > 5 AND successful_logins > 0 
+| eval time_window = (last_attempt - first_attempt)/60 
+| where time_window < 30  // 30-minute window
+```
+
+#### **Impossible Travel**
+```splunk
+index=google_workspace log_type=login status=SUCCESS 
+| iplocation client_ip 
+| stats 
+  earliest(_time) as first_login, 
+  latest(_time) as last_login, 
+  values(city) as cities, 
+  values(country) as countries 
+  by user 
+| eval time_diff = (last_login - first_login)/3600 
+| where time_diff < 24 
+| eval distance = haversine(first_login, last_login) 
+| where distance > 500  // 500 km in less than 24h
+```
+
+#### **Suspicious IPs (Threat Intel Lookup)**
+```splunk
+index=google_workspace log_type=login 
+| lookup threat_intel_ip client_ip OUTPUT threat_desc 
+| where isnotnull(threat_desc) 
+| table _time, user, client_ip, threat_desc
+```
+
+---
+
+## **2. Insider Threats & Data Exfiltration**
+### **Detection Scenarios**
+- **Mass File Downloads/Deletions** (Potential data theft)
+- **Unauthorized Sharing of Sensitive Files** (External sharing of confidential docs)
+- **Unusual Access Patterns** (Accessing files outside job role)
+- **After-Hours Activity** (Unusual logins or file access at odd hours)
+
+### **SPL Queries**
+#### **Mass File Downloads**
+```splunk
+index=google_workspace log_type=drive event_type=download 
+| stats count by user, file_name 
+| where count > 50  // Threshold for excessive downloads
+```
+
+#### **Sensitive File Shared Externally**
+```splunk
+index=google_workspace log_type=drive event_type=share 
+| search shared_with_domain != "yourcompany.com" 
+| table _time, user, file_name, shared_with_email
+```
+
+#### **After-Hours Activity**
+```splunk
+index=google_workspace log_type=login OR log_type=drive 
+| eval hour = strftime(_time, "%H") 
+| where hour > 20 OR hour < 6  // 8 PM - 6 AM
+| stats count by user, event_type
+```
+
+---
+
+## **3. Privilege Escalation & Admin Abuse**
+### **Detection Scenarios**
+- **Unauthorized Admin Role Changes** (Sudden privilege escalation)
+- **Super Admin Logins from Unusual Locations** (Compromised admin accounts)
+- **Excessive Permission Grants** (Bulk user permission changes)
+
+### **SPL Queries**
+#### **Admin Role Changes**
+```splunk
+index=google_workspace log_type=admin event_type=assign_role 
+| table _time, admin_user, target_user, new_role
+```
+
+#### **Super Admin Logins from New Countries**
+```splunk
+index=google_workspace log_type=login status=SUCCESS user=*admin* 
+| iplocation client_ip 
+| stats count by user, country 
+| where count < 5  // Rare country for this admin
+```
+
+#### **Bulk Permission Changes**
+```splunk
+index=google_workspace log_type=admin event_type=modify_permissions 
+| stats dc(target_user) as users_affected by admin_user 
+| where users_affected > 10
+```
+
+---
+
+## **4. Compliance Violations & Audit Failures**
+### **Detection Scenarios**
+- **Disabled Audit Logging** (Attempts to turn off logging)
+- **GDPR Violations** (Personal data shared externally)
+- **Failed Compliance Checks** (Unauthorized access to regulated data)
+
+### **SPL Queries**
+#### **Disabled Audit Logging**
+```splunk
+index=google_workspace log_type=admin event_type=change_setting 
+| search setting_name="audit_logging" new_value="disabled" 
+| table _time, admin_user, setting_name, new_value
+```
+
+#### **External Sharing of Sensitive Files (GDPR)**
+```splunk
+index=google_workspace log_type=drive event_type=share 
+| search file_name="*confidential*" AND shared_with_domain!="yourcompany.com" 
+| table _time, user, file_name, shared_with_email
+```
+
+---
+
+## **5. Threat Correlation with Other Log Sources**
+### **Detection Scenarios**
+- **Google Workspace + Endpoint Logs** (Malware detected after suspicious login)
+- **Google Workspace + VPN Logs** (Impossible travel verification)
+- **Google Workspace + Email Logs** (Phishing link clicked before account compromise)
+
+### **SPL Query Example (Malware + Suspicious Login)**
+```splunk
+index=google_workspace log_type=login status=SUCCESS 
+| join type=inner user 
+  [ search index=endpoint_logs event_type=malware_detected ] 
+| table _time, user, client_ip, malware_name
+```
