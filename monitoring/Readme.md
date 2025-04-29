@@ -30,7 +30,7 @@ Here’s a **focused breakdown** of **Monitoring, Logging & Incident Response** 
 ---
 
 ### **2. Phased Implementation Plan (LaTeX Table)**
-```latex
+```tikz
 \documentclass{article}
 \usepackage[table]{xcolor}
 \usepackage{multirow}
@@ -97,7 +97,7 @@ Phase 5 & Month 9-12 & Continuous Compliance &
 ---
 
 ### **3. Venn Diagram: Compliance Overlap (LaTeX TikZ)**
-```latex
+```tikz
 \documentclass[tikz,border=10pt]{standalone}
 \usetikzlibrary{shapes,arrows,positioning}
 
