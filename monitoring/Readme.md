@@ -30,7 +30,7 @@ Here’s a **focused breakdown** of **Monitoring, Logging & Incident Response** 
 ---
 
 ### **2. Phased Implementation Plan (LaTeX Table)**
-```tikz
+```MathJax 
 \documentclass{article}
 \usepackage[table]{xcolor}
 \usepackage{multirow}
