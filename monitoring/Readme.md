@@ -27,65 +27,22 @@ Here’s a **focused breakdown** of **Monitoring, Logging & Incident Response** 
 | **Forensic Readiness**       | GDPR (Art. 33), PCI-DSS (Req 12.10)                                                     | FTK Imager, Volatility                      |
 | **Breach Notification Process** | GDPR (72h), CCPA (45 days), HIPAA (60 days)                                           | OneTrust, TrustArc                          |
 
+
 ---
 
-### **2. Phased Implementation Plan (LaTeX Table)**
-$$
-\documentclass{article}
-\usepackage[table]{xcolor}
-\usepackage{multirow}
+### **2. Phased Implementation for Monitoring, Logging & IR Compliance**  
 
-\begin{document}
+| **Phase**  | **Timeline** | **Focus**               | **Key Actions** |
+|------------|-------------|-------------------------|----------------|
+| **Phase 1** | Month 1-2   | Logging Foundation      | • Deploy centralized logging (e.g., ELK/Splunk) <br> • Enable audit trails for critical systems (AD, DBs) <br> • Define retention policies (align with GDPR/PCI) |
+| **Phase 2** | Month 3-4   | Real-time Monitoring    | • Implement SIEM (e.g., Sentinel, QRadar) <br> • Configure alerts for compliance violations (e.g., failed logins) <br> • Integrate threat intelligence feeds (MISP) |
+| **Phase 3** | Month 5-6   | Incident Readiness      | • Document IRP (NIST 800-61 template) <br> • Conduct tabletop exercises (HIPAA/SOC 2) <br> • Deploy SOAR for automated playbooks |
+| **Phase 4** | Month 7-8   | Advanced Controls       | • Roll out UEBA/FIM (e.g., Darktrace, OSSEC) <br> • Encrypt logs + immutable storage (PCI 10.5) <br> • Test forensic tools (FTK, Volatility) |
+| **Phase 5** | Month 9-12  | Continuous Compliance   | • Automate compliance reports (e.g., Drata) <br> • Annual pentesting + IR drill (PCI 11.3) <br> • Update IRP post-audit findings |
 
-\begin{table}[h]
-\centering
-\caption{Phased Implementation for Monitoring, Logging \& IR Compliance}
-\label{tab:phases}
-\begin{tabular}{|l|l|l|p{6cm}|}
-\hline
-\rowcolor{gray!20}
-\textbf{Phase} & \textbf{Timeline} & \textbf{Focus} & \textbf{Key Actions} \\
-\hline
-Phase 1 & Month 1-2 & Logging Foundation & 
-\begin{itemize}
-    \item Deploy centralized logging (e.g., ELK/Splunk)
-    \item Enable audit trails for critical systems (AD, DBs)
-    \item Define retention policies (align with GDPR/PCI)
-\end{itemize} \\
-\hline
-Phase 2 & Month 3-4 & Real-time Monitoring & 
-\begin{itemize}
-    \item Implement SIEM (e.g., Sentinel, QRadar)
-    \item Configure alerts for compliance violations (e.g., failed logins)
-    \item Integrate threat intelligence feeds (MISP)
-\end{itemize} \\
-\hline
-Phase 3 & Month 5-6 & Incident Readiness & 
-\begin{itemize}
-    \item Document IRP (NIST 800-61 template)
-    \item Conduct tabletop exercises (HIPAA/SOC 2)
-    \item Deploy SOAR for automated playbooks
-\end{itemize} \\
-\hline
-Phase 4 & Month 7-8 & Advanced Controls & 
-\begin{itemize}
-    \item Roll out UEBA/FIM (e.g., Darktrace, OSSEC)
-    \item Encrypt logs + immutable storage (PCI 10.5)
-    \item Test forensic tools (FTK, Volatility)
-\end{itemize} \\
-\hline
-Phase 5 & Month 9-12 & Continuous Compliance & 
-\begin{itemize}
-    \item Automate compliance reports (e.g., Drata)
-    \item Annual pentesting + IR drill (PCI 11.3)
-    \item Update IRP post-audit findings
-\end{itemize} \\
-\hline
-\end{tabular}
-\end{table}
+---
 
-\end{document}
-$$
+
 
 **Key Compliance Drivers per Phase:**  
 - **Phase 1:** GDPR (Art. 30), PCI-DSS (Req 10)  
@@ -97,56 +54,37 @@ $$
 ---
 
 ### **3. Venn Diagram: Compliance Overlap (LaTeX TikZ)**
-```tikz
-\documentclass[tikz,border=10pt]{standalone}
-\usetikzlibrary{shapes,arrows,positioning}
 
-\begin{document}
-\begin{tikzpicture}[
-    comp/.style={draw, circle, minimum size=3.5cm, align=center},
-    label/.style={font=\bfseries\small}
-]
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffffff'}}}%%
+graph TD
+    A[Logging\n(PCI, GDPR)]:::logging
+    B[Monitoring\n(NIST, ISO 27001)]:::monitoring
+    C[Incident Response\n(HIPAA, SOC 2)]:::ir
 
-% Circles
-\node[comp, fill=blue!20] (log) {Logging \\ (PCI, GDPR)};
-\node[comp, fill=red!20, right=4cm of log] (mon) {Monitoring \\ (NIST, ISO 27001)};
-\node[comp, fill=green!20, below=3cm of $(log.south)!0.5!(mon.south)$] (ir) {Incident Response \\ (HIPAA, SOC 2)};
+    classDef logging fill:#d4e6ff,stroke:#3a7bd5
+    classDef monitoring fill:#ffd4d4,stroke:#ff0000
+    classDef ir fill:#d4ffd5,stroke:#00aa00
 
-% Overlaps
-\begin{scope}
-    \clip (log) circle (1.75cm);
-    \clip (mon) circle (1.75cm);
-    \fill[purple!30] (log) circle (1.75cm);
-\end{scope}
-\begin{scope}
-    \clip (log) circle (1.75cm);
-    \clip (ir) circle (1.75cm);
-    \fill[teal!30] (log) circle (1.75cm);
-\end{scope}
-\begin{scope}
-    \clip (mon) circle (1.75cm);
-    \clip (ir) circle (1.75cm);
-    \fill[orange!30] (mon) circle (1.75cm);
-\end{scope}
+    AB["SIEM\n(PCI 10.6 + NIST AU-4)"]:::overlap1
+    AC["Forensic Logs\n(HIPAA 164.312 + GDPR 33)"]:::overlap2
+    BC["SOAR\n(NIST RS.RP-1 + SOC 2 CC7.2)"]:::overlap3
 
-% Labels
-\node[label] at (barycentric cs:log=1,mon=1) {SIEM \\ (PCI 10.6 + NIST AU-4)};
-\node[label] at (barycentric cs:log=1,ir=1) {Forensic Logs \\ (HIPAA 164.312 + GDPR 33)};
-\node[label] at (barycentric cs:mon=1,ir=1) {SOAR \\ (NIST RS.RP-1 + SOC 2 CC7.2)};
+    A & B --> AB
+    A & C --> AC
+    B & C --> BC
 
-% Legend
-\node[draw, fill=white, anchor=north east] at (current bounding box.north east) {
-    \begin{tabular}{l l}
-        \textcolor{blue}{Logging} & PCI, GDPR \\
-        \textcolor{red}{Monitoring} & NIST, ISO \\
-        \textcolor{green}{IR} & HIPAA, SOC 2 \\
-    \end{tabular}
-};
+    classDef overlap1 fill:#e6d4ff,stroke:#9370db
+    classDef overlap2 fill:#d4ffff,stroke:#20b2aa
+    classDef overlap3 fill:#ffe6d4,stroke:#ffa07a
 
-\end{tikzpicture}
-\end{document}
+    subgraph Legend
+        direction TB
+        L1[Logging]:::logging
+        L2[Monitoring]:::monitoring
+        L3[IR]:::ir
+    end
 ```
-
 **Diagram Insights:**  
 - **Purple (Logging + Monitoring):** SIEM for PCI-DSS (Req 10) + NIST AU-4.  
 - **Teal (Logging + IR):** Forensic logs for HIPAA breach investigations.  
