@@ -59,7 +59,7 @@ Monitoring, Logging & Incident Response** components for enterprise compliance, 
 
 ---
 
-### **1. Compliance-Aligned Monitoring, Logging & Incident Response (Mermaid)**  
+### **3.1. Compliance-Aligned Monitoring, Logging & Incident Response (Mermaid)**  
 ```mermaid
 flowchart TD
     A[Monitoring, Logging & Incident Response] --> B[SIEM]
@@ -100,7 +100,7 @@ flowchart TD
 
 ---
 
-### **2. Phased Implementation Plan (Mermaid Gantt Chart)**  
+### **3.2. Phased Implementation Plan (Mermaid Gantt Chart)**  
 ```mermaid
 gantt
     title Phased Implementation for Compliance
@@ -140,7 +140,7 @@ gantt
 
 ---
 
-### **3. Compliance Mapping (Mermaid Mind Map)**  
+### **3.3. Compliance Mapping (Mermaid Mind Map)**  
 ```mermaid
 mindmap
   root((Compliance Mapping))
