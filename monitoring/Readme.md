@@ -53,42 +53,130 @@ Here’s a **focused breakdown** of **Monitoring, Logging & Incident Response** 
 
 ---
 
-### **3. Venn Diagram: Compliance Overlap (LaTeX TikZ)**
+### **3. Venn Diagram: Compliance Overlap **
 
+Below is a **Mermaid.js** diagram illustrating the **Monitoring, Logging & Incident Response** components for enterprise compliance, followed by a **phased implementation plan**.  
+
+---
+
+### **1. Compliance-Aligned Monitoring, Logging & Incident Response (Mermaid)**  
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffffff'}}}%%
-graph TD
-    A[Logging\n(PCI, GDPR)]:::logging
-    B[Monitoring\n(NIST, ISO 27001)]:::monitoring
-    C[Incident Response\n(HIPAA, SOC 2)]:::ir
-
-    classDef logging fill:#d4e6ff,stroke:#3a7bd5
-    classDef monitoring fill:#ffd4d4,stroke:#ff0000
-    classDef ir fill:#d4ffd5,stroke:#00aa00
-
-    AB["SIEM\n(PCI 10.6 + NIST AU-4)"]:::overlap1
-    AC["Forensic Logs\n(HIPAA 164.312 + GDPR 33)"]:::overlap2
-    BC["SOAR\n(NIST RS.RP-1 + SOC 2 CC7.2)"]:::overlap3
-
-    A & B --> AB
-    A & C --> AC
-    B & C --> BC
-
-    classDef overlap1 fill:#e6d4ff,stroke:#9370db
-    classDef overlap2 fill:#d4ffff,stroke:#20b2aa
-    classDef overlap3 fill:#ffe6d4,stroke:#ffa07a
-
-    subgraph Legend
-        direction TB
-        L1[Logging]:::logging
-        L2[Monitoring]:::monitoring
-        L3[IR]:::ir
-    end
+flowchart TD
+    A[Monitoring, Logging & Incident Response] --> B[SIEM]
+    A --> C[Log Management]
+    A --> D[Threat Intelligence]
+    A --> E[Forensics]
+    A --> F[SOAR]
+    
+    B --> B1[Real-Time Alerting]
+    B --> B2[Compliance Reports]
+    
+    C --> C1[Centralized Logs]
+    C --> C2[Immutable Storage]
+    
+    D --> D1[MISP]
+    D --> D2[AlienVault OTX]
+    
+    E --> E1[Memory Analysis]
+    E --> E2[Network Forensics]
+    
+    F --> F1[Automated Playbooks]
+    F --> F2[Incident Triage]
+    
+    style A fill:#2ecc71,stroke:#27ae60,color:white
+    style B fill:#3498db,stroke:#2980b9
+    style C fill:#3498db,stroke:#2980b9
+    style D fill:#3498db,stroke:#2980b9
+    style E fill:#3498db,stroke:#2980b9
+    style F fill:#3498db,stroke:#2980b9
 ```
-**Diagram Insights:**  
-- **Purple (Logging + Monitoring):** SIEM for PCI-DSS (Req 10) + NIST AU-4.  
-- **Teal (Logging + IR):** Forensic logs for HIPAA breach investigations.  
-- **Orange (Monitoring + IR):** SOAR aligns with NIST incident response.  
+
+**Key Components:**  
+- **SIEM (Splunk, QRadar):** Real-time alerts + compliance reports (e.g., SOC 2, ISO 27001).  
+- **Log Management (ELK, Graylog):** Centralized, tamper-proof logs for audits.  
+- **Threat Intelligence (MISP):** Proactive threat detection.  
+- **Forensics (FTK, Volatility):** Post-incident analysis.  
+- **SOAR (Cortex XSOAR):** Automated incident response.  
+
+---
+
+### **2. Phased Implementation Plan (Mermaid Gantt Chart)**  
+```mermaid
+gantt
+    title Phased Implementation for Compliance
+    dateFormat  YYYY-MM-DD
+    axisFormat  %m-%d
+    
+    section Phase 1: Foundation
+    SIEM Deployment       :a1, 2024-01-01, 60d
+    Log Aggregation Setup :a2, after a1, 30d
+    
+    section Phase 2: Threat Detection
+    Threat Intel Integration :b1, 2024-03-01, 30d
+    Baseline Monitoring Rules :b2, after b1, 30d
+    
+    section Phase 3: Response
+    SOAR Playbooks :c1, 2024-05-01, 45d
+    Forensics Toolkit :c2, after c1, 30d
+    
+    section Phase 4: Validation
+    Penetration Testing :d1, 2024-07-01, 30d
+    Compliance Audit :d2, after d1, 30d
+```
+
+**Phases Explained:**  
+1. **Phase 1 (Foundation):**  
+   - Deploy SIEM (e.g., Splunk) for centralized monitoring.  
+   - Set up log aggregation (e.g., AWS CloudTrail + ELK).  
+2. **Phase 2 (Threat Detection):**  
+   - Integrate threat feeds (e.g., MISP for GDPR/NIST).  
+   - Define baseline correlation rules (e.g., brute-force attacks).  
+3. **Phase 3 (Response):**  
+   - Automate IR with SOAR (e.g., quarantine compromised devices).  
+   - Deploy forensics tools (e.g., Volatility for malware analysis).  
+4. **Phase 4 (Validation):**  
+   - Pen-testing (PCI-DSS Requirement 11.3).  
+   - Final audit (e.g., ISO 27001 certification).  
+
+---
+
+### **3. Compliance Mapping (Mermaid Mind Map)**  
+```mermaid
+mindmap
+  root((Compliance Mapping))
+    SIEM
+      SOC 2 (CC6.1)
+      ISO 27001 (A.12.4)
+      PCI-DSS (Req 10)
+    Log Management
+      GDPR (Art. 30)
+      HIPAA (164.312)
+    SOAR
+      NIST CSF (RS.AN-5)
+      CCPA (Data Breach Response)
+```
+
+**Regulatory Alignment:**  
+- **SIEM:** PCI-DSS (Requirement 10), ISO 27001 (A.12.4).  
+- **Logs:** GDPR (Article 30), HIPAA (164.312).  
+- **SOAR:** NIST CSF (Respond Function).  
+
+---
+
+### **Key Takeaways**  
+1. **Start with SIEM/Logs** to meet most compliance requirements (e.g., PCI-DSS, HIPAA).  
+2. **Automate response (SOAR)** for frameworks like NIST CSF.  
+3. **Validate annually** with pentests/audits.  
+
+**Example Tools by Phase:**  
+| Phase       | Tools                          | Compliance Target       |  
+|-------------|-------------------------------|------------------------|  
+| 1           | Splunk, ELK                   | SOC 2, ISO 27001       |  
+| 2           | MISP, AlienVault              | NIST SP 800-53         |  
+| 3           | Cortex XSOAR, Volatility      | GDPR Art. 33           |  
+
+Would you like a version focused on a **specific framework** (e.g., HIPAA technical safeguards)?
+  
 
 ---
 
