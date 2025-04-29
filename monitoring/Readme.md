@@ -53,9 +53,9 @@ Here’s a **focused breakdown** of **Monitoring, Logging & Incident Response** 
 
 ---
 
-### **3. Venn Diagram: Compliance Overlap **
+### 3. Compliance Overlap 
 
-Below is a **Mermaid.js** diagram illustrating the **Monitoring, Logging & Incident Response** components for enterprise compliance, followed by a **phased implementation plan**.  
+Monitoring, Logging & Incident Response** components for enterprise compliance, followed by a **phased implementation plan**.  
 
 ---
 
@@ -174,8 +174,6 @@ mindmap
 | 1           | Splunk, ELK                   | SOC 2, ISO 27001       |  
 | 2           | MISP, AlienVault              | NIST SP 800-53         |  
 | 3           | Cortex XSOAR, Volatility      | GDPR Art. 33           |  
-
-Would you like a version focused on a **specific framework** (e.g., HIPAA technical safeguards)?
   
 
 ---
