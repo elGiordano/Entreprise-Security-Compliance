@@ -30,7 +30,7 @@ Here’s a **focused breakdown** of **Monitoring, Logging & Incident Response** 
 ---
 
 ### **2. Phased Implementation Plan (LaTeX Table)**
-```MathJax 
+$$
 \documentclass{article}
 \usepackage[table]{xcolor}
 \usepackage{multirow}
@@ -85,7 +85,7 @@ Phase 5 & Month 9-12 & Continuous Compliance &
 \end{table}
 
 \end{document}
-```
+$$
 
 **Key Compliance Drivers per Phase:**  
 - **Phase 1:** GDPR (Art. 30), PCI-DSS (Req 10)  
